@@ -27,6 +27,10 @@ class Credit extends Model
         return $this->belongsTo('App\Person');
     }
 
+    public function prenda() {
+        return $this->hasMany('App\Prenda');
+    }
+
     public static function diasPlazo($plazo) {
         switch ($plazo) {
             case self::PLAZO_SEMANAL:

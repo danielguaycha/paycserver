@@ -17,5 +17,8 @@ composer install
 
 ```bash
 php artisan install:all
+php artisan passport:install
 ```
+
+## Módulos
 

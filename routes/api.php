@@ -13,6 +13,7 @@ Route::apiResource('client', 'Api\ClientApiController')->except(['destroy']);
 
 // credit routes
 Route::put('credit/cancel', 'Api\CreditApiController@cancel');
+Route::get('credit/search', 'Api\CreditApiController@search');
 Route::apiResource('credit', 'Api\CreditApiController')->except(['destroy']);
 // routes
 Route::apiResource('route', 'Api\RutaApiController')->only(['store', 'index']);

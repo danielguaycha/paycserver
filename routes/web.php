@@ -15,3 +15,6 @@ Route::resource('employ', 'EmployController');
 Route::resource('ruta', 'RutaController');
 // roles
 Route::resource('rol', 'RoleController');
+
+
+Route::get('storage/{pathFile}/{filename}', 'AdminController@viewImg');
