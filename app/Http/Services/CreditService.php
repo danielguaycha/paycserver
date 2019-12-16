@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Credit;
+use App\Payment;
 use App\Prenda;
 use App\Traits\UploadTrait;
 use Carbon\Carbon;
@@ -30,6 +31,7 @@ class CreditService {
             'prenda_detail' => 'nullable|string|max:150',
             'geo_lat' => 'nullable|numeric',
             'geo_lon' => 'nullable|numeric',
+            'f_inicio' => 'nullable|date_format:Y-m-d'
         ], $this->messages());
 
 
@@ -59,26 +61,61 @@ class CreditService {
         $c->ref_detail = $request->get('ref_detail');
 
         // fechas
-        $c->f_inicio = Carbon::now()->format('Y-m-d');
-        $c->f_fin = Carbon::now()->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
+        if(!$request->get('f_inicio')) {
+            $c->f_inicio = Carbon::now()->format('Y-m-d');
+            $c->f_fin = Carbon::now()->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
+        }
+        else{
+            $c->f_inicio = $request->get('f_inicio');
+            $c->f_fin = Carbon::parse($c->f_inicio)->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
+        }
 
-        // cálculos
-        $c->total_utilidad = ($c->monto * ($c->utilidad/100));
-        $c->total = $c->monto + $c->total_utilidad;
+        // Cálculos
+        $c->total_utilidad = ($c->monto * ($c->utilidad/100)); // utilidad
+        $c->total = $c->monto + $c->total_utilidad; // total con utilidad
 
-        $pagos_y_plazo = $this->getNumPaysForTerms($c->plazo, $c->total, $c->cobro);
-        $c->pagos_de = $pagos_y_plazo['total'];
+        //
+        $calc = $this->calcCredit($c->plazo, $c->total, $c->cobro);
 
-        // Descripción
-        $c->description = ( round($pagos_y_plazo['pagos'], 2)).' pago(s) de '.$c->pagos_de.' | Duración: '.$c->plazo;
+        $c->pagos_de = $calc['pagosDe']; // pagos de $
+        $c->pagos_de_last = $calc['pagosDeLast']; // ultimo pago de $
+        $c->description = $calc['description']; // descripción
+        $c->n_pagos = $calc['nPagos'];
 
         if($c->save()) {
+            $this->storePayments($c->id, $calc, $c->f_inicio, $c->f_fin, $c->cobro);
             $this->storePrenda($request, $c->id);
             DB::commit();
             return $c;
         } else {
             DB::rollBack();
             return "No se ha podido procesar el crédito";
+        }
+    }
+
+    public function storePayments($credit_id, $calc, $fInit, $fEnd, $cobro){
+        $date = Carbon::parse($fInit);
+
+        for($i = 0; $i < $calc['nPagos']; $i++) {
+            $date_calc = $date->addDays(Credit::diasCobro($cobro));
+            Payment::create([
+                'credit_id' => $credit_id,
+                'total' => $calc['pagosDe'],
+                'status' => Payment::STATUS_ACTIVE,
+                'date' => $date_calc->format('Y-m-d'),
+                'description' => 'Pendiente'
+            ]);
+            $date = $date_calc;
+        }
+
+        if($calc['pagosDeLast'] !== 0) {
+            $date_calc = $date->addDays(Credit::diasCobro($cobro));
+            Payment::create([
+                'credit_id' => $credit_id,
+                'total' => $calc['pagosDeLast'],
+                'status' => Payment::STATUS_ACTIVE,
+                'date' => $date_calc->format('Y-m-d')
+            ]);
         }
     }
 
@@ -104,8 +141,18 @@ class CreditService {
             return 'No tienes permiso para realizar esta acción';
         }
 
+        $payments_numbers = Payment::select('id')
+            ->where('credit_id', $c->id)
+            ->where('status', Payment::STATUS_FINISH)->count();
+
+
+        if($payments_numbers > 0) {
+            return 'Este crédito tiene pagos registrados, no puede ser anulado';
+        }
+
         $c->status = Credit::STATUS_ANULADO;
         if ($c->save()) {
+            Payment::select('id')->where('credit_id', $c->id)->delete();
             return $c;
         } else {
             return "No se ha podido anular este crédito";
@@ -127,13 +174,40 @@ class CreditService {
         ];
     }
 
-    private function getNumPaysForTerms($plazo, $mount, $cobro) {
+    private function calcCredit($plazo, $mount, $cobro) {
         $diasPlazo = Credit::diasPlazo($plazo);
         $diasCobro = Credit::diasCobro($cobro);
-        $numPagos = intval( $diasPlazo / $diasCobro );
+        $numPagos = intval($diasPlazo / $diasCobro );
+        $numPagosReal = $numPagos;
 
-        return ['total' => ($mount / $numPagos), 'pagos'=> $numPagos ];
+        $pagosDe = round($mount / $numPagos, 2);
+        $pagosDeLast = 0;
+        $totalIdeal = $pagosDe * $numPagos;
+
+        if($totalIdeal !== $mount) {
+            if($totalIdeal < $mount) {
+                $diferencia = $mount - $totalIdeal;
+                $pagosDeLast = round($pagosDe + $diferencia, 2);
+                $numPagos--;
+            }
+        }
+
+        if($pagosDeLast === 0) {
+            $description = $numPagos.' pago(s) de '.$pagosDe;
+        } else {
+            $description = $numPagos.' pago(s) de '.$pagosDe.' + un pago de '.$pagosDeLast;
+        }
+
+        $description.= ' | Plazo: '.$plazo. ', Cobro: '.$cobro;
+
+        return([
+            'nPagos' => $numPagosReal,
+            'pagosDe' => $pagosDe,
+            'pagosDeLast' => $pagosDeLast,
+            'description'=> $description]);
     }
+
+
 
     public function  hasActiveCredit($person_id) {
         $c = Credit::select('id')->where([

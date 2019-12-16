@@ -27,10 +27,13 @@ class CreateCreditsTable extends Migration
             $table->string('ref_detail', 150)->nullable();
 
             // money values
-            $table->decimal('monto', 13, 4);  // monto a prestar
-            $table->double('total_utilidad', 10, 4)->default(0);
-            $table->double('total', 10, 4)->default(0);
-            $table->double('pagos_de', 10, 4)->default(0);
+            $table->decimal('monto', 13, 2);  // monto a prestar
+            $table->double('total_utilidad', 10, 2)->default(0);
+            $table->double('total', 10, 2)->default(0);
+
+            $table->double('pagos_de', 10, 2)->default(0);
+            $table->double('pagos_de_last', 10, 2)->default(0);
+            $table->integer('n_pagos')->default(0);
 
             $table->string('geo_lat')->nullable();
             $table->string('geo_lon')->nullable();

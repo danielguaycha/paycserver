@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Credit;
 use App\Http\Controllers\ApiController;
 use App\Http\Services\CreditService;
+use App\Payment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -52,7 +53,8 @@ class CreditApiController extends ApiController
 
         $credit = Credit::join('persons', 'persons.id', 'credits.person_id')
             ->join('rutas', 'rutas.id', 'credits.ruta_id')
-            ->select('credits.id', 'credits.cobro', 'credits.plazo', 'credits.person_id', 'credits.total',
+            ->select('credits.id', 'credits.cobro', 'credits.plazo',
+                'credits.person_id', 'credits.total',
                 'persons.name', 'persons.surname', 'rutas.name as ruta')
             ->where($wheres)->whereIn('credits.ruta_id', $zones)
             ->orderBy('id', 'desc')
@@ -106,7 +108,9 @@ class CreditApiController extends ApiController
     public function show($id)
     {
         $c = Credit::join('rutas', 'rutas.id', 'credits.ruta_id')
-            ->select('credits.*', 'rutas.name as ruta')
+            ->join('persons', 'persons.id', 'credits.person_id')
+            ->select('credits.*', 'rutas.name as ruta',
+                'persons.name as client_name', 'persons.surname as client_surname', 'persons.address as client_address')
             ->where('credits.id', $id)->with('prenda')->first();
         //$file = Storage::disk('public')->get($c->ref_img);
 
@@ -130,10 +134,29 @@ class CreditApiController extends ApiController
 
         $c = $this->creditService->cancelCredit($request);
 
+
         if ($c instanceof Model) {
             return $this->success("Crédito anulado con éxito");
         }
 
         return $this->err($c);
+    }
+
+    public function finish($id){
+        $c = Credit::findOrFail($id);
+
+        if($c->status !== Credit::STATUS_ACTIVO) {
+            return $this->err('Este crédito ha sido marcado como anulado '.($c===Credit::STATUS_ANULADO) ? 'anulado':  'finalizado');
+        }
+
+        $payment_total = Payment::where('status', Payment::STATUS_ACTIVE)->sum('total');
+
+        if($payment_total >= $c->total) {
+            $c->status = Credit::STATUS_FINALIZADO;
+            $c->save();
+            return $this->success('Crédito finalizado con éxito!');
+        } else {
+            return $this->err('El total de los pagos es menor al total del crédito');
+        }
     }
 }

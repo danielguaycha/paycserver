@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 trait ApiResponse {
-    private function ok($data, $code = 200) {
+    public function ok($data, $code = 200) {
         return response()->json(['data'=> $data, 'ok'=> true], $code);
     }
 
@@ -21,7 +21,6 @@ trait ApiResponse {
     protected function showAll(Collection $collection, $code = 200) {
         return $this->ok($collection, $code);
     }
-
     protected function showOne(Model $instance, $code = 200) {
         return $this->ok($instance, $code);
     }

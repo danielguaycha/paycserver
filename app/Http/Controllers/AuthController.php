@@ -7,6 +7,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\Client;
 
 class AuthController extends ApiController
@@ -17,7 +18,7 @@ class AuthController extends ApiController
 
     public function __construct(){
         $this->client = Client::where("password_client", true)->first();
-        $this->middleware("auth:api")->only(['user', 'logout', 'refresh']);
+        $this->middleware("auth:api")->only(['user', 'logout', 'refresh', 'changePw']);
     }
 
     public function login(Request $request) {
@@ -63,4 +64,15 @@ class AuthController extends ApiController
         return $this->showOne($user);
     }
 
+    public function changePw(Request $request) {
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $u = User::findOrFail($request->user()->id);
+        $u->password = Hash::make($request->get('password'));
+        if($u->save()) {
+            return $this->success('Contraseña cambiada con éxito');
+        } else return $this->err('No se ha podido cambiar su contraseña');
+    }
 }

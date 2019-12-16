@@ -2,16 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2cbd3027-707b-4717-8553-7a3d8dc0395d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/Daniel.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.rnd" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Credit.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Credit.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/CreditApiController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/CreditApiController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Services/CreditService.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Services/CreditService.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Traits/ApiResponse.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Traits/ApiResponse.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2019_11_05_151614_create_credits_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2019_11_05_151614_create_credits_table.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/routes/web.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/web.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -24,22 +21,6 @@
     <execution>
       <executable />
     </execution>
-  </component>
-  <component name="FindInProjectRecents">
-    <findStrings>
-      <find>lang</find>
-      <find>cre</find>
-      <find>The given</find>
-      <find>The given data was invalid.</find>
-      <find>username</find>
-      <find>amount</find>
-      <find>percent</find>
-      <find>term</find>
-      <find>payment</find>
-      <find>phones</find>
-      <find>;</find>
-      <find>logo</find>
-    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -213,6 +194,12 @@
       <workItem from="1574901259170" duration="601000" />
       <workItem from="1575288928560" duration="5786000" />
       <workItem from="1575331651539" duration="9000" />
+      <workItem from="1575913543022" duration="3539000" />
+      <workItem from="1575919216634" duration="2247000" />
+      <workItem from="1575933184203" duration="1001000" />
+      <workItem from="1576350778842" duration="16758000" />
+      <workItem from="1576428355075" duration="3461000" />
+      <workItem from="1576459119097" duration="7090000" />
     </task>
     <servers />
   </component>
