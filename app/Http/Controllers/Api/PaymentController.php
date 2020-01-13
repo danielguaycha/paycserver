@@ -12,34 +12,43 @@ use Illuminate\Support\Str;
 class PaymentController extends ApiController
 {
 
-    public function __construct()
-    {
-        $this->middleware('auth:api');
+    public function __construct() {
+        $this->middleware("auth:api");
     }
 
     public function index(Request $request)
     {
         $date = Carbon::now()->format('Y-m-d');
         $only = 'all';
+        $src = '';
 
+        // obtener las zonas del usuario o las de la petición
         if ($request->query('zone')){
             $zones = array($request->query('zone'));
         } else {
             $zones = $request->user()->rutas->last()->pluck('id');
             if(!$zones) return $this->err('Aun tienes rutas asignadas');
         }
-
+        // validar los query's de date (Fecha del cobro), only(Solo un tipo de plazo de cobro), src (Para mapas)
         if($request->query('date')) {$date = $request->query('date');}
         if($request->query('only')) {$only = Str::lower($request->query('only'));}
+        if($request->query('src')) { $src = Str::lower($request->query('src'));}
 
+        // consulta base
         $payments = Payment::join('credits', 'credits.id', 'payments.credit_id')
             ->join('persons', 'persons.id', 'credits.person_id')
-            ->select('credits.cobro', 'credits.address',
-                'payments.id', 'payments.credit_id', 'payments.total', 'payments.status', 'payments.mora',
-                'persons.name as client_name', 'persons.surname as client_surname')
             ->whereDate('payments.date', $date)->whereIn('credits.ruta_id', $zones);
 
-        if($only === 'all') {
+        if($src === 'map') { // selección solo para mapas
+            $payments->select('credits.address', 'credits.geo_lon as lon', 'credits.geo_lat as lat',
+                'payments.credit_id', 'payments.id', 'persons.name as client_name', 'persons.surname as client_surname');
+        } else { // selección para vista normal
+            $payments->select('credits.cobro', 'credits.address',
+                'payments.id', 'payments.credit_id', 'payments.total', 'payments.status', 'payments.mora',
+                'persons.name as client_name', 'persons.surname as client_surname');
+        }
+
+        if($only === 'all') { // en caso de que quieran todos los plazos
             $payment_diario = $payments->where('credits.cobro', Credit::COBRO_DIARIO)->get();
             $payment_semanal = $payments->where('credits.cobro', Credit::COBRO_SEMANAL)->get();
             $payment_quincenal = $payments->where('credits.cobro', Credit::COBRO_QUINCENAL)->get();
@@ -53,6 +62,7 @@ class PaymentController extends ApiController
             ]);
         }
 
+        // en caso de que el plazo sea uno en especifico
         if($only === 'diario') {
             return $this->showAll($payments->where('credits.cobro', Credit::COBRO_DIARIO)->get());
         }
@@ -68,8 +78,6 @@ class PaymentController extends ApiController
         if($only === 'mensual') {
             return $this->showAll($payments->where('credits.cobro', Credit::COBRO_MENSUAL)->get());
         }
-
-
     }
 
     public function store(Request $request)
@@ -89,7 +97,7 @@ class PaymentController extends ApiController
         $payments = Payment::select('id', 'total', 'status', 'mora', 'date')
             ->where('credit_id', $id)->orderBy('date', 'asc')->get();
 
-        $totales = $payments->where('status', Payment::STATUS_FINISH);
+        $totales = $payments->where('status', Payment::STATUS_PAID);
 
         $credit->total_pagado = $totales->sum('total');
         $credit->n_pagos = $totales->count();
@@ -98,8 +106,7 @@ class PaymentController extends ApiController
         return $this->showOne($credit);
     }
 
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id) {
         $request->validate([
             'status' => 'required|in:2,-1',
             'description' => 'nullable|string|max:100'
@@ -111,16 +118,17 @@ class PaymentController extends ApiController
 
         $payment->status = $request->get('status');
 
-        if($payment->status === 2) {
+        if($payment->status == 2) {
             $payment->description = ($request->get('description') ? $request->get('description') : 'Cobro exitoso');
         }
 
-        if($payment->status === -1) {
+        if($payment->status == -1) {
             $payment->mora =  true;
             $payment->description = ($request->get('description') ? $request->get('description') : 'Registrado con atraso o mora');
         }
 
         $payment->date_payment = Carbon::now()->format('Y-m-d');
+        $payment->user_id = $request->user()->id;
 
         if($payment->save()) {
             return $this->showOne($payment);
@@ -130,9 +138,27 @@ class PaymentController extends ApiController
         }
     }
 
-    public function destroy($id)
-    {
-        //
+    public function destroy(Request $request, $id) {
+
+        $request->validate([
+            'description' => 'required|string|max:100'
+        ], [
+            'description.required' => 'Ingrese el motivo para anular!'
+        ]);
+
+        $payment = Payment::findOrFail($id);
+
+        if($payment->status !== Payment::STATUS_PAID) {
+            return $this->err('Solo es posible anular pagos procesados!');
+        }
+
+        $payment->status = Payment::STATUS_ACTIVE;
+        $payment->description = $request->description;
+        
+        if($payment->save()) {
+            return $this->success("Anulado exitosamente");
+        }
+        return $this->err('No se ha podido anular el pago');
     }
 
     /*

@@ -18,7 +18,7 @@ class CreateEmploysTable extends Migration
             $table->bigInteger('person_id')->unsigned();
             $table->bigInteger('user_id')->unsigned()->nullable();
 
-            $table->decimal('sueldo', 10, 4);
+            $table->decimal('sueldo', 10, 2);
             $table->string('pago_sueldo',  50)->default(\App\Employ::PAGO_SEMANAL);
             $table->integer('status')->default(1);
             $table->timestamps();

@@ -17,8 +17,8 @@ class AdminMiddleware
                 return response()->json(['ok'=> false, 'message'=> 'No autenticado, Inicie sesión para continuar', 401]);
         }
 
-        if (! $request->user()->hasRole('admin')) {
-            abort(403);
+        if (!$request->user()->hasRole('Admin')) {
+            return response()->json(['ok' => false, 'message' => 'Necesitas permisos de administrador'], 403);
         }
 
         return $next($request);

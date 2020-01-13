@@ -85,7 +85,7 @@ class Handler extends ExceptionHandler
             return $this->err('No posee permisos para ejecutar esta acción!', 403);
         }
         if($exception instanceof HttpException) {
-            return $this->err("El método especificado no es válida", 405);
+            return $this->err("El método especificado no es válido", 405);
         }
 
         if(config('app.debug')){

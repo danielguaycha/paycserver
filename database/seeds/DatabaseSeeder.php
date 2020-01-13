@@ -17,11 +17,11 @@ class DatabaseSeeder extends Seeder
         DB::table("rutas")->insert(['name' => 'Zona 1']);
         DB::table("rutas")->insert(['name' => 'Zona 2']);
 
-        // create admin Role and person
+        // create Admin Role and person
 
         $id =  DB::table("persons")->insertGetId([
             'name' => 'admin',
-            'surname' => '',
+            'surname' => 'root',
             'status' => 1,
             'address' => 'Local',
             'phones' => '000000000, 000000000',
@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(PermitSeeder::class);
-        $user->assignRole('admin');
+        $user->assignRole('Admin');
 
 
         // create employ for dev
@@ -64,7 +64,6 @@ class DatabaseSeeder extends Seeder
 
             $epUser->rutas()->sync([1, 2]);
             $epUser->assignRole('employ');
-
         }
 
     }

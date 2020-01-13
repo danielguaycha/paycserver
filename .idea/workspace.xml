@@ -2,13 +2,37 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2cbd3027-707b-4717-8553-7a3d8dc0395d" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/paycenter.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/paycenter.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/CreditApiController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/CreditApiController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Exceptions/Handler.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Exceptions/Handler.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/AdminController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/AdminController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/ClientApiController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/ClientController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/CreditApiController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/CreditController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/ExpenseController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/ExpenseController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/PaymentController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/PaymentController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/RutaApiController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/RutaController.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/AuthController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/EmployController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/EmployController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/RoleController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Admin/RoleController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/RutaController.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Kernel.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Kernel.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/AdminMiddleware.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/AdminMiddleware.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/Http/Services/CreditService.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Services/CreditService.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Traits/ApiResponse.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Traits/ApiResponse.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Services/RutaService.php" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Payment.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Payment.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Providers/AuthServiceProvider.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Providers/AuthServiceProvider.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" afterPath="$PROJECT_DIR$/composer.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2019_11_04_204950_create_employs_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2019_11_04_204950_create_employs_table.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/database/migrations/2019_11_05_151614_create_credits_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2019_11_05_151614_create_credits_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/migrations/2019_12_09_180141_create_payments_table.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2019_12_09_180141_create_payments_table.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/seeds/DatabaseSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeds/DatabaseSeeder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/database/seeds/PermitSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeds/PermitSeeder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/layouts/app.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/layouts/app.blade.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/resources/views/ruta/index.blade.php" beforeDir="false" afterPath="$PROJECT_DIR$/resources/views/ruta/index.blade.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/routes/web.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/web.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -129,6 +153,8 @@
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/psr7" />
       <path value="$PROJECT_DIR$/vendor/guzzlehttp/promises" />
       <path value="$PROJECT_DIR$/vendor/spatie/laravel-permission" />
+      <path value="$PROJECT_DIR$/vendor/barryvdh/laravel-cors" />
+      <path value="$PROJECT_DIR$/vendor/asm89/stack-cors" />
     </include_path>
   </component>
   <component name="ProjectId" id="1UDpvO7w6UWmC39bwgNB0gncqwK" />
@@ -145,6 +171,9 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Code\Laravel\paycserver\app\Http\Controllers" />
+      <recent name="D:\Code\Laravel\paycserver\app\Http\Controllers\Admin" />
+      <recent name="D:\Code\Laravel\paycserver\app\Http\Controllers\Api" />
       <recent name="C:\Users\Detzer\Desktop\paycenter\app\Http\Controllers\Api" />
     </key>
   </component>
@@ -199,7 +228,18 @@
       <workItem from="1575933184203" duration="1001000" />
       <workItem from="1576350778842" duration="16758000" />
       <workItem from="1576428355075" duration="3461000" />
-      <workItem from="1576459119097" duration="7090000" />
+      <workItem from="1576459119097" duration="8524000" />
+      <workItem from="1576501881320" duration="6372000" />
+      <workItem from="1576680023142" duration="6912000" />
+      <workItem from="1576945650863" duration="4869000" />
+      <workItem from="1576966704371" duration="839000" />
+      <workItem from="1576969526134" duration="4931000" />
+      <workItem from="1577296019624" duration="973000" />
+      <workItem from="1578324038368" duration="3827000" />
+      <workItem from="1578531264098" duration="1676000" />
+      <workItem from="1578599917060" duration="4711000" />
+      <workItem from="1578761883446" duration="2219000" />
+      <workItem from="1578927760238" duration="1507000" />
     </task>
     <servers />
   </component>

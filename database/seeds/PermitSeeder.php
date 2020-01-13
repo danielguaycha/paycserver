@@ -23,7 +23,7 @@ class PermitSeeder extends Seeder
         Permission::create(['name' => 'edit.ruta']);
         Permission::create(['name' => 'delete.ruta']);
 
-        $role = Role::create(['name' => 'admin']);
+        $role = Role::create(['name' => 'Admin']);
         $role->givePermissionTo(Permission::all());
 
         $roleEmploy = Role::create(['name' => 'employ']);

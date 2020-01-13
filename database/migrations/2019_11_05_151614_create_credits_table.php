@@ -44,6 +44,7 @@ class CreateCreditsTable extends Migration
 
             $table->date('f_inicio')->nullable();
             $table->date('f_fin')->nullable();
+            $table->timestamp('created_at')->useCurrent();
 
             $table->foreign('ruta_id')->references('id')->on('rutas');
             $table->foreign('user_id')->references('id')->on('users');

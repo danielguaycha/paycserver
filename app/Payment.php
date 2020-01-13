@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends Model
 {
     const STATUS_ACTIVE = 1;
-    const STATUS_FINISH = 2;
+    const STATUS_PAID = 2;
+    const STATUS_FINISH = -1;
 
     public $timestamps = false;
     protected $fillable = [

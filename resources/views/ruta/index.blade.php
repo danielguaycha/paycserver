@@ -10,7 +10,7 @@
                     <div>
                         Rutas
                     </div>
-                    @role('admin')
+                    @role('Admin')
                         <div>
                             <a href="{{ route('ruta.create') }}" class="btn btn-primary btn-sm">Nueva Ruta</a>
                         </div>
@@ -22,7 +22,7 @@
                         <tr>
                             <th>Nombre</th>
                             <th>Descripción</th>
-                            @role('admin')
+                            @role('Admin')
                                 <th>Opciones</th>
                             @endrole
                         </tr>
@@ -32,7 +32,7 @@
                                 <tr>
                                     <td>{{ $r->name }}</td>
                                     <td>{{ $r->description }}</td>
-                                    @role('admin')
+                                    @role('Admin')
                                     <td>
                                         <a href="{{ route('ruta.edit', ['rutum'=> $r->id ]) }}" class="btn btn-sm btn-primary">Editar</a>
                                         <form method="post" action="{{ route('ruta.destroy', ['rutum'=> $r->id ]) }}" id="form-{{ $r->id }}" class="d-inline-block">

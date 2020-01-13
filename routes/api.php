@@ -8,25 +8,38 @@ Route::post('logout', 'AuthController@logout');
 Route::post('user/password', 'AuthController@changePw');
 Route::get('user', 'AuthController@user');
 
+Route::namespace('Admin')->group(function () {
+
+    // employs
+    Route::post('employ/ruta', 'EmployController@store_ruta');
+    Route::put('employ/cancel/{id}', 'EmployController@cancel');
+    Route::apiResource('employ', 'EmployController');
+
+});
+
 Route::namespace('Api')->group(function () {
     // clients routes
 
-    Route::get('client/search', 'ClientApiController@search');
-    Route::apiResource('client', 'ClientApiController')->except(['destroy']);
+    Route::get('client/search', 'ClientController@search');
+    Route::apiResource('client', 'ClientController')->except(['destroy']);
 
     // credit routes
-    Route::put('credit/cancel', 'CreditApiController@cancel');
-    Route::get('credit/search', 'CreditApiController@search');
-    Route::put('credit/end/{id}', 'CreditApiController@finish');
-    Route::apiResource('credit', 'CreditApiController')->except(['destroy']);
+    Route::put('credit/cancel/{id}', 'CreditController@cancel');
+    Route::get('credit/search', 'CreditController@search');
+    Route::put('credit/end/{id}', 'CreditController@finish');
+    Route::apiResource('credit', 'CreditController')->except(['destroy']);
 
     // routes
-    Route::apiResource('route', 'RutaApiController')->only(['store', 'index']);
+    Route::apiResource('route', 'RutaController');
 
     // payments
-    Route::apiResource('payment', 'PaymentController');
+    Route::apiResource('payment', 'PaymentController')->only(['index', 'show', 'update', 'destroy']);
 
     // expenses
-    Route::apiResource('expense', 'ExpenseController');
+    Route::apiResource('expense', 'ExpenseController')->only(['index', 'store']);
+
+    // payroll
+    Route::get('employ/info/{employId}', 'PayRollController@showInfo');
+    Route::apiResource('payroll', 'PayRollController');
 });
 

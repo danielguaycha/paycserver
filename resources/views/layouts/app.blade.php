@@ -39,13 +39,13 @@
                             <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Rutas</a>
                             <div class="dropdown-menu">
                                 <a class="dropdown-item" href="{{ route('ruta.index') }}">Listar</a>
-                                @role('admin')
+                                @role('Admin')
                                 <a class="dropdown-item" href="{{ route('ruta.create') }}">Nueva</a>
                                 <a class="dropdown-item" href="{{ route('employ.assign_route') }}">Asignar Ruta</a>
                                 @endrole
                             </div>
                         </li>
-                            @role('admin')
+                            @role('Admin')
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Empleados</a>
                                     <div class="dropdown-menu">

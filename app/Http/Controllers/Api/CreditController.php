@@ -8,17 +8,17 @@ use App\Http\Services\CreditService;
 use App\Payment;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class CreditApiController extends ApiController
+class CreditController extends ApiController
 {
     private $creditService;
 
     public function __construct()
     {
         $this->creditService = new CreditService();
-        $this->middleware('auth:api');
+        $this->middleware("auth:api");
     }
 
     public function index(Request $request)
@@ -54,7 +54,8 @@ class CreditApiController extends ApiController
         $credit = Credit::join('persons', 'persons.id', 'credits.person_id')
             ->join('rutas', 'rutas.id', 'credits.ruta_id')
             ->select('credits.id', 'credits.cobro', 'credits.plazo',
-                'credits.person_id', 'credits.total',
+                'credits.person_id', 'credits.total', 'credits.geo_lat as lat', 
+                'credits.geo_lon as lon', 'credits.address',
                 'persons.name', 'persons.surname', 'rutas.name as ruta')
             ->where($wheres)->whereIn('credits.ruta_id', $zones)
             ->orderBy('id', 'desc')
@@ -62,7 +63,6 @@ class CreditApiController extends ApiController
 
         return $this->showAll($credit);
     }
-
 
     public function search(Request $request) {
         $page = 1;
@@ -91,7 +91,6 @@ class CreditApiController extends ApiController
         return $this->showAll($credit);
     }
 
-
     public function store(Request $request)
     {
 
@@ -104,7 +103,6 @@ class CreditApiController extends ApiController
         }
     }
 
-
     public function show($id)
     {
         $c = Credit::join('rutas', 'rutas.id', 'credits.ruta_id')
@@ -114,31 +112,36 @@ class CreditApiController extends ApiController
             ->where('credits.id', $id)->with('prenda')->first();
         //$file = Storage::disk('public')->get($c->ref_img);
 
-        return $this->showOne($c);
+        if($c !== null) {
+            return $this->showOne($c);
+        }
+        else {
+            return $this->err('No se ha encontrado el crédito');
+        }
     }
 
+    public function showMap($id) {
+
+
+    }
 
     public function update(Request $request, $id)
     {
         //
     }
 
-
     public function destroy($id)
     {
         //
     }
 
-
-    public function cancel(Request $request) {
-
-        $c = $this->creditService->cancelCredit($request);
-
+    public function cancel(Request $request, $id) {
+        $c = $this->creditService->cancelCredit($request, $id);
 
         if ($c instanceof Model) {
             return $this->success("Crédito anulado con éxito");
         }
-
+        
         return $this->err($c);
     }
 
@@ -146,17 +149,42 @@ class CreditApiController extends ApiController
         $c = Credit::findOrFail($id);
 
         if($c->status !== Credit::STATUS_ACTIVO) {
-            return $this->err('Este crédito ha sido marcado como anulado '.($c===Credit::STATUS_ANULADO) ? 'anulado':  'finalizado');
+            return $this->err('Este crédito ha sido marcado como: '.($c===Credit::STATUS_ANULADO ? 'ANULADO':  'FINALIZADO'));
         }
 
-        $payment_total = Payment::where('status', Payment::STATUS_ACTIVE)->sum('total');
+        $payments = Payment::select('status', 'id')->where('status', Payment::STATUS_PAID)
+            ->where('credit_id', $id);
+        $payment_total = $payments->sum('total');
 
         if($payment_total >= $c->total) {
+
             $c->status = Credit::STATUS_FINALIZADO;
-            $c->save();
-            return $this->success('Crédito finalizado con éxito!');
+            DB::beginTransaction();
+            if($c->save()) {
+
+                foreach ($payments->get() as $p) {
+
+                    if($p->status === Payment::STATUS_PAID) {
+                        $p->status = Payment::STATUS_FINISH;
+                        if(!$p->save()) {
+                            DB::rollBack();
+                            return $this->err('No se pudo finalizar por motivos de pagos');
+                        }
+                    } else {
+                        DB::rollBack();
+                        return $this->err('No se puede finalizar el crédito con pagos pendientes');
+                    }
+                }
+
+                DB::commit();
+                return $this->success('Crédito finalizado con éxito!');
+
+            } else {
+                DB::rollBack();
+                return $this->err('No se ha podido finalizar el crédito');
+            }
         } else {
-            return $this->err('El total de los pagos es menor al total del crédito');
+            return $this->err('Aun no se ha terminado de pagar el crédito: $'.$payment_total.' de $'.$c->total);
         }
     }
 }

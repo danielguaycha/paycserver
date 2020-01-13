@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Credit;
 use App\Payment;
+use App\Person;
 use App\Prenda;
 use App\Traits\UploadTrait;
 use Carbon\Carbon;
@@ -34,6 +35,10 @@ class CreditService {
             'f_inicio' => 'nullable|date_format:Y-m-d'
         ], $this->messages());
 
+
+        if(!Person::find($request->get('person_id'))) {
+            return 'El cliente seleccionado no existe';
+        }
 
         DB::beginTransaction();
 
@@ -129,13 +134,16 @@ class CreditService {
         }
     }
 
-    public function cancelCredit(Request $request){
+    public function cancelCredit(Request $request, $id){
 
         $request->validate([
-            'id' => 'required'
-        ], ['id.required' => 'El crédito a anular es requerido']);
+            'description' => 'required|string|max:100'
+        ], [
+            'description.required' => 'Ingrese el motivo para anular!'
+        ]);
 
-        $c = Credit::findOrFail($request->get('id'));
+        $c = Credit::findOrFail($id);
+        $c->description = $request->get('description');
 
         if( $c->user_id !== $request->user()->id ) {
             return 'No tienes permiso para realizar esta acción';
@@ -144,7 +152,6 @@ class CreditService {
         $payments_numbers = Payment::select('id')
             ->where('credit_id', $c->id)
             ->where('status', Payment::STATUS_FINISH)->count();
-
 
         if($payments_numbers > 0) {
             return 'Este crédito tiene pagos registrados, no puede ser anulado';
@@ -206,8 +213,6 @@ class CreditService {
             'pagosDeLast' => $pagosDeLast,
             'description'=> $description]);
     }
-
-
 
     public function  hasActiveCredit($person_id) {
         $c = Credit::select('id')->where([

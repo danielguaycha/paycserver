@@ -29,6 +29,7 @@ class AuthController extends ApiController
         ]);
 
         $u = User::select('status')->where('username', $request->username)->first();
+
         if($u && $u->status === 0) {
             return $this->err('Acceso denegado', 401);
         }
@@ -59,20 +60,36 @@ class AuthController extends ApiController
     }
 
     public function user(Request $request) {
-        $user = $request->user();
-        $user->person;
-        return $this->showOne($user);
+
+        $userId = $request->user()->id;
+        $roles = $request->user()->hasRole('Admin');
+        $user = User::where('users.id', $userId)->join('persons', 'users.person_id', 'persons.id')
+            ->select('persons.name', 'persons.surname',  'persons.email',
+                'users.id', 'users.username', 'users.person_id', 'users.status')->get()->first();
+        $user->admin = $roles;
+
+        return $this->ok($user);
     }
 
     public function changePw(Request $request) {
         $request->validate([
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:4',
+            'password_now' => 'required|string'
+        ], [
+            'password_now.required' => 'Ingrese su contraseña actual'
         ]);
 
         $u = User::findOrFail($request->user()->id);
+
+        if (!Hash::check($request->get('password_now'), $u->password)) {
+            return $this->err('La contraseña actual es incorrecta');
+        }
+
         $u->password = Hash::make($request->get('password'));
+
         if($u->save()) {
             return $this->success('Contraseña cambiada con éxito');
+
         } else return $this->err('No se ha podido cambiar su contraseña');
     }
 }

@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Services\ClientService;
 use App\Http\Controllers\ApiController;
 
-class ClientApiController extends ApiController
+class ClientController extends ApiController
 {
 
     public $clientService;
@@ -25,7 +25,7 @@ class ClientApiController extends ApiController
     }
 
     public function store(Request $request)
-    {        
+    {
         $client = $this->clientService->store($request);
 
         if( $client !== null ) {
@@ -73,7 +73,7 @@ class ClientApiController extends ApiController
                         ['name', 'like', '%'.$search.'%'],
                         ['id', '<>', 1]
                     ])
-                    ->orWhere('surname', 'like', '%'.$search.'%')       
+                    ->orWhere('surname', 'like', '%'.$search.'%')
                     ->limit(4)->get();
 
         return $this->showAll($c);
