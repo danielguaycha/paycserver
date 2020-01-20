@@ -3,11 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\File;
+
 
 class AdminController extends Controller
 {
-    public function viewImg(Request $request, $pathFile, $filename){
+    public function __construct()
+    {
+        //$this->middleware('auth:api')->only(['viewImg']);
+    }
+
+    public function viewImg($pathFile, $filename, Request $request){
+
         $path = storage_path('app/public'.DIRECTORY_SEPARATOR.$pathFile.DIRECTORY_SEPARATOR. $filename);
 
             if (!File::exists($path)) {

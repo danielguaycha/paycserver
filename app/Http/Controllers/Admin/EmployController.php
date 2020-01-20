@@ -45,7 +45,8 @@ class EmployController extends ApiController
             'sueldo' => 'required',
             'pago_sueldo' => 'required|string',
             'username' => 'required|string|max:50|unique:users,username',
-            'password' => 'required'
+            'password' => 'required',
+            'admin' => 'required|boolean'
         ], ['username.unique' => 'Este nombre de usuario ya está en uso']);
 
         DB::beginTransaction();
@@ -72,6 +73,10 @@ class EmployController extends ApiController
         if(!$u->save()) {
             DB::rollBack();
             return $this->err('No se ha podido registrar las credenciales del usuario');
+        }
+
+        if($request->admin) {
+            $u->assignRole('Admin');
         }
 
         // employ

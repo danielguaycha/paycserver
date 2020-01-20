@@ -93,7 +93,6 @@ class Handler extends ExceptionHandler
         }
 
         return $this->err('Falla inesperada, intente más tarde', 500);
-
     }
 
     protected function invalidJson($request, ValidationException $exception)

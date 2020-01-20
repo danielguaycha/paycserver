@@ -1,4 +1,7 @@
 <?php
+
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
 // auth routes
@@ -21,7 +24,8 @@ Route::namespace('Api')->group(function () {
     // clients routes
 
     Route::get('client/search', 'ClientController@search');
-    Route::apiResource('client', 'ClientController')->except(['destroy']);
+    Route::put('client/cancel/{id}', 'ClientController@cancel');
+    Route::apiResource('client', 'ClientController');
 
     // credit routes
     Route::put('credit/cancel/{id}', 'CreditController@cancel');
@@ -36,10 +40,12 @@ Route::namespace('Api')->group(function () {
     Route::apiResource('payment', 'PaymentController')->only(['index', 'show', 'update', 'destroy']);
 
     // expenses
-    Route::apiResource('expense', 'ExpenseController')->only(['index', 'store']);
+    Route::get('/expense/info', 'ExpenseController@info');
+    Route::apiResource('expense', 'ExpenseController')->except(['update']);
 
     // payroll
     Route::get('employ/info/{employId}', 'PayRollController@showInfo');
     Route::apiResource('payroll', 'PayRollController');
 });
 
+Route::get('image/{path}/{filename}', 'AdminController@viewImg');

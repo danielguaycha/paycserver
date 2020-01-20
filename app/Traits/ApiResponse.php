@@ -10,6 +10,10 @@ trait ApiResponse {
         return response()->json(['data'=> $data, 'ok'=> true], $code);
     }
 
+    public function custom($data, $code = 200) {
+        return response()->json($data, $code);
+    }
+
     public function success($message) {
         return response()->json(['message' => $message, 'ok' => true], 200);
     }

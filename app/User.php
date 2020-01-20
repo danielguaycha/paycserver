@@ -13,6 +13,7 @@ class User extends Authenticatable
 
     const STATUS_INACTIVE = 0;
     const STATUS_ACTIVE = 1;
+    const ADMIN_ROLE = 'Admin';
 
     protected $fillable = [
         'name', 'email', 'password',

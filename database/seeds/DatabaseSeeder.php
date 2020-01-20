@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         $id =  DB::table("persons")->insertGetId([
             'name' => 'admin',
             'surname' => 'root',
-            'status' => 1,
+            'status' => -999,
             'address' => 'Local',
             'phones' => '000000000, 000000000',
             'email' => 'admin@mail.com'

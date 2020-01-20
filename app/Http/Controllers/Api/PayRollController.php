@@ -22,7 +22,7 @@ class PayRollController extends ApiController
     {
         $pr = PayRoll::join('employs', 'employs.id', 'pay_rolls.employ_id')
             ->join('persons', 'persons.id', 'employs.person_id')
-            ->select('pay_rolls.total', 'pay_rolls.date', 
+            ->select('pay_rolls.id as id','pay_rolls.total', 'pay_rolls.date', 'pay_rolls.description',
                 'pay_rolls.concept', 'pay_rolls.bonus', 'pay_rolls.status',
                 'persons.name', 'persons.surname', 'employs.id as employ_id')        
             ->orderBy('pay_rolls.id', 'desc')
@@ -97,7 +97,11 @@ class PayRollController extends ApiController
 
     public function show($id)
     {
-        
+        $pr = PayRoll::join('employs', 'employs.id', 'pay_rolls.employ_id')
+            ->join('persons', 'persons.id', 'employs.person_id')
+            ->select('pay_rolls.*','persons.name', 'persons.surname', 'employs.id as employ_id')
+            ->where('pay_rolls.id', $id)->first();
+        return $this->showOne($pr);            
     }
 
     public function showInfo($employId, Request $request) 
@@ -107,13 +111,19 @@ class PayRollController extends ApiController
         $weekStartDate = $now->startOfWeek()->format('Y-m-d');
         $weekEndDate = $now->endOfWeek(Carbon::SUNDAY)->format('Y-m-d');
 
-        // fechas
         if($request->query('start')) {
-            $weekStartDate = $request->query('start');
-            
-        }            
+            $weekStartDate = $request->query('start');            
+        }
+
         if($request->query('end')){
             $weekEndDate = $request->query('end');
+        }
+
+        // fechas
+        if($request->query('now')) {
+            $now = new Carbon($request->query('now'));   
+            $weekStartDate = $now->startOfWeek()->format('Y-m-d');
+            $weekEndDate = $now->endOfWeek(Carbon::SUNDAY)->format('Y-m-d');         
         }
     
 
@@ -122,11 +132,21 @@ class PayRollController extends ApiController
         if(!$employ) return $this->err('No existe este empleado');
 
         // 10 ultimos pagos realizados
-        $pr = PayRoll::where('employ_id', $employId)  
+        if($request->query('now')) {
+            $pr = PayRoll::where('employ_id', $employId)  
             ->where('status', PayRoll::STATUS_ACTIVE)
-            ->select('id','advance','total', 'concept', 'date')            
+            ->whereBetween('created_at', [$weekStartDate, $weekEndDate]);            
+        }
+        else {
+            $pr = PayRoll::where('employ_id', $employId)  
+            ->where('status', PayRoll::STATUS_ACTIVE);
+        }
+
+        $pr = $pr->select('id','advance','total', 'concept', 'date')            
             ->orderBy('date', 'desc')
             ->limit(10)->get();     
+
+    
         
         // Creditos realizados en la semana actual
         $credits = Credit::where([
@@ -169,11 +189,22 @@ class PayRollController extends ApiController
         //
     }
 
-    public function destroy($id)
-    {
-        //
-    }
+    public function destroy($id, Request $request)
+    {   
+        $request->validate([
+            'description' => 'required|string|max:100'
+        ], ['description.required' => 'Ingrese el motivo para anular el rol de pago']);
 
+        $pr = PayRoll::findOrFail($id);
+        $pr->description = $request->description;
+        $pr->status = PayRoll::STATUS_ANULADO;
+
+        if($pr->save()) {
+            return $this->success('Rol de pago anulado con éxito!');
+        }
+
+        return $this->err('No se ha podido anular el rol del pago');
+    }
     // functions
     private function havePaysInWeek($employId) {
         $now = Carbon::now();
@@ -181,7 +212,10 @@ class PayRollController extends ApiController
         $weekEndDate = $now->endOfWeek(Carbon::SATURDAY)->format('Y-m-d');
 
         return PayRoll::where('employ_id', $employId)
-            ->where('advance', false)
+            ->where([
+                ['advance', false],
+                ['status', PayRoll::STATUS_ACTIVE]
+            ])
             ->whereBetween('date', [$weekStartDate, $weekEndDate])
             ->select('id')->exists();  
     }
