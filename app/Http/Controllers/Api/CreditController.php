@@ -6,6 +6,7 @@ use App\Credit;
 use App\Http\Controllers\ApiController;
 use App\Http\Services\CreditService;
 use App\Payment;
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -24,9 +25,7 @@ class CreditController extends ApiController
     public function index(Request $request)
     {
         $page = 1;
-        $wheres = [
-            ['credits.status', Credit::STATUS_ACTIVO]
-        ];
+        $wheres = [];
 
         // page
         if ($request->query('page'))
@@ -34,14 +33,6 @@ class CreditController extends ApiController
 
         $limit = 10;
         $offset = ($page-1) * $limit;
-
-
-        // id de ruta
-        $route_id = $request->query('ruta');
-
-        // ruta
-        if($route_id) { $zones = [$route_id]; }
-        else { $zones = $request->user()->rutas->pluck('id'); }
 
         // plazo
         $plazo = $request->query('plazo');
@@ -52,8 +43,21 @@ class CreditController extends ApiController
         if($cobro) { array_push($wheres, ['cobro', Str::upper($cobro)]); }
 
         $credit = Credit::join('persons', 'persons.id', 'credits.person_id')
-            ->join('rutas', 'rutas.id', 'credits.ruta_id')
-            ->select('credits.id', 'credits.cobro', 'credits.plazo',
+            ->join('rutas', 'rutas.id', 'credits.ruta_id');
+        
+        // para empleados
+        if (!$request->user()->hasRole(User::ADMIN_ROLE)) 
+        {
+            // id de ruta
+            $route_id = $request->query('ruta');
+
+            // ruta
+            if($route_id) { $zones = [$route_id]; }
+            else { $zones = $request->user()->rutas->pluck('id'); }
+
+            array_push($wheres, ['credits.status', Credit::STATUS_ACTIVO]);
+            
+            $credit= $credit->select('credits.id', 'credits.cobro', 'credits.plazo',
                 'credits.person_id', 'credits.total', 'credits.geo_lat as lat', 
                 'credits.geo_lon as lon', 'credits.address',
                 'persons.name', 'persons.surname', 'rutas.name as ruta')
@@ -61,7 +65,21 @@ class CreditController extends ApiController
             ->orderBy('id', 'desc')
             ->limit($limit)->offset($offset)->get();
 
-        return $this->showAll($credit);
+            return $this->showAll($credit);
+        }
+        
+        // para administrador
+        else 
+        {
+            $credit= $credit->select('credits.*', 'persons.name', 'persons.surname',
+                DB::raw("CONCAT(persons.name, ' ' ,persons.surname) AS client"), 'rutas.name as ruta')
+            ->where($wheres)
+            ->orderBy('id', 'desc')
+            ->limit($limit)->offset($offset)->get();
+
+            return $this->showAll($credit);
+        }        
+            
     }
 
     public function search(Request $request) {

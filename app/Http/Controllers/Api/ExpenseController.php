@@ -36,60 +36,94 @@ class ExpenseController extends ApiController
         if($request->query('from') && !$request->query('to'))
             array_push($wheres, ['expenses.date', '=', $request->query('from')]);
 
+        // from to
         if($request->query('from') && $request->query('to')){
             array_push($wheres, ['expenses.date', '>=', $request->query('from')]);
-            array_push($wheres, ['expenses.date', '<=', $request->query('to')]);           
+            array_push($wheres, ['expenses.date', '<=', $request->query('to')]);
         }
 
+        // limit
         if($request->query('limit')) {
             $limit = $request->query('limit');
         }
 
-        
+        // employ
+        if($request->query('employ_id')) {
+            $employ = Employ::findOrFail($request->employ_id);
+            array_push($wheres, ['expenses.user_id', $employ->user->id]);
+        }
+
         $offset = ($page-1) * $limit;
 
         // si no es administrador
         if(!$request->user()->hasRole(User::ADMIN_ROLE)) {
-            array_push($wheres,['user_id', $request->user()->id]);
-            array_push($wheres,['status', Expense::STATUS_ACTIVO ]);
+            array_push($wheres,['expenses.user_id', $request->user()->id]);
+            array_push($wheres,['expenses.status', Expense::STATUS_ACTIVO ]);
 
-            $expenses = Expense::select('id', 'monto', 'category', 'date')
+            $expenses = Expense::join('users', 'users.id', 'expenses.user_id')
+            ->join('persons', 'persons.id', 'users.person_id')
+            ->select('expenses.id', 'expenses.monto', 'expenses.category', 'expenses.date','expenses.status',
+                'expenses.image', 'expenses.description',
+                DB::raw("CONCAT(persons.name, ' ' ,persons.surname) AS name"))            
             ->where($wheres)
             ->offset($offset)->limit($limit)
-            ->orderBy('date', 'desc')->get();
-            
+            ->orderBy('expenses.date', 'desc')->get();
+
             return $this->showAll($expenses);
         }
+
         // para el administrador
         else {
             $expenses = Expense::join('users', 'users.id', 'expenses.user_id')
             ->join('persons', 'persons.id', 'users.person_id')
-            ->select('expenses.id', 'expenses.monto', 'expenses.category', 'expenses.date','expenses.status', 
-                'expenses.image', 'expenses.description', 
+            ->select('expenses.id', 'expenses.monto', 'expenses.category', 'expenses.date','expenses.status',
+                'expenses.image', 'expenses.description',
                 DB::raw("CONCAT(persons.name, ' ' ,persons.surname) AS name"))
-            ->where($wheres)    
+            ->where($wheres)
             ->offset($offset)->limit($limit)
-            ->orderBy('expenses.date', 'desc')->get();  
+            ->orderBy('expenses.date', 'desc')->get();
 
 
             $count = Expense::select('id')->where($wheres)->count();
 
             return $this->custom([
-                'data'=> $expenses, 
-                'ok'=>true, 
+                'data'=> $expenses,
+                'ok'=>true,
                 'total'=> $count]);
         }
     }
 
-    public function info(Request $request) 
+    public function info(Request $request)
     {
+        $wheres = [
+            ['status', Expense::STATUS_ACTIVO]
+        ];
+
+        if ($request->query('employ_id')) {
+            $employ = Employ::findOrFail($request->employ_id);
+            array_push($wheres, ['user_id', $employ->user->id]);
+        }
+
         $now = Carbon::now();
         $weekStartDate = $now->startOfWeek()->format('Y-m-d');
         $weekEndDate = $now->endOfWeek(Carbon::SATURDAY)->format('Y-m-d');
-        $mothStartDate = $now->firstOfMonth();
-        $mothEndDate = $now->endOfMonth();
+        $mothStartDate = $now->firstOfMonth()->format('Y-m-d');
+        $mothEndDate = $now->endOfMonth()->format('Y-m-d');
 
-        dd($now, $weekStartDate, $weekEndDate, $mothStartDate);
+        $g_now = Expense::select('monto')->where($wheres)
+            ->where('date', Carbon::now()->format('Y-m-d'))->sum('monto');
+
+        $g_week = Expense::select('monto')->where($wheres)
+            ->whereBetween('date', [$weekStartDate, $weekEndDate])->sum('monto');
+
+        $g_month = Expense::select('monto')->where($wheres)
+            ->whereBetween('date', [$mothStartDate, $mothEndDate])->sum('monto');
+
+        return $this->ok([
+            'today' => $g_now,
+            'week'=> $g_week,
+            'month' => $g_month
+        ]);
     }
 
     public function store(Request $request)
@@ -107,12 +141,12 @@ class ExpenseController extends ApiController
         $expensive->monto = $request->get('monto');
         $expensive->category = Str::upper($request->get('category'));
         $expensive->description = $request->get('description');
-        if ($request->employ_id && $request->user()->hasRole(User::ADMIN_ROLE)) 
-        {            
+        if ($request->employ_id && $request->user()->hasRole(User::ADMIN_ROLE))
+        {
             $employ = Employ::findOrFail($request->employ_id);
             $expensive->user_id = $employ->user->id;
-        }            
-        else 
+        }
+        else
         {
            $expensive->user_id = $request->user()->id;
         }
@@ -138,10 +172,10 @@ class ExpenseController extends ApiController
         $expense = Expense::join('users', 'users.id', 'expenses.user_id')
             ->join('persons', 'persons.id', 'users.person_id')
             ->select('expenses.*', DB::raw("CONCAT(persons.name, ' ' ,persons.surname) AS name"))
-            ->where('expenses.id', $id)->first();            
+            ->where('expenses.id', $id)->first();
         if (!$expense)
             return $this->err('No se encontró el gasto');
-        else 
+        else
             return $this->ok($expense);
     }
 
