@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Employ;
 use App\Expense;
 use App\Http\Controllers\ApiController;
+use App\Role;
 use App\Traits\UploadTrait;
 use App\User;
 use Carbon\Carbon;
@@ -56,7 +57,7 @@ class ExpenseController extends ApiController
         $offset = ($page-1) * $limit;
 
         // si no es administrador
-        if(!$request->user()->hasRole(User::ADMIN_ROLE)) {
+        if(!$request->user()->isAdmin()) {
             array_push($wheres,['expenses.user_id', $request->user()->id]);
             array_push($wheres,['expenses.status', Expense::STATUS_ACTIVO ]);
 
@@ -64,7 +65,7 @@ class ExpenseController extends ApiController
             ->join('persons', 'persons.id', 'users.person_id')
             ->select('expenses.id', 'expenses.monto', 'expenses.category', 'expenses.date','expenses.status',
                 'expenses.image', 'expenses.description',
-                DB::raw("CONCAT(persons.name, ' ' ,persons.surname) AS name"))            
+                DB::raw("CONCAT(persons.name, ' ' ,persons.surname) AS name"))
             ->where($wheres)
             ->offset($offset)->limit($limit)
             ->orderBy('expenses.date', 'desc')->get();
@@ -141,7 +142,7 @@ class ExpenseController extends ApiController
         $expensive->monto = $request->get('monto');
         $expensive->category = Str::upper($request->get('category'));
         $expensive->description = $request->get('description');
-        if ($request->employ_id && $request->user()->hasRole(User::ADMIN_ROLE))
+        if ($request->employ_id && $request->user()->isAdmin())
         {
             $employ = Employ::findOrFail($request->employ_id);
             $expensive->user_id = $employ->user->id;

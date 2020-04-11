@@ -21,7 +21,7 @@ class CreateCreditsTable extends Migration
             $table->string("cobro", 25); // tiempo de cobro (Diario, semanal, quincenal)
             $table->integer('status')->default(\App\Credit::STATUS_ACTIVO);
             $table->string('description', 100)->nullable();
-            $table->string('address', 150)->nullable();
+            $table->string('address', 100)->nullable();
 
             $table->string('ref_img', 150)->nullable();
             $table->string('ref_detail', 150)->nullable();

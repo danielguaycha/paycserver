@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Api;
 
 use App\Employ;
 use App\Http\Controllers\ApiController;
@@ -12,7 +12,6 @@ use Illuminate\Support\Str;
 
 class EmployController extends ApiController
 {
-
     public function index(Request $request)
     {
         $page = 1;
@@ -119,6 +118,20 @@ class EmployController extends ApiController
         return $this->showOne($e);
     }
 
+    /**
+     * @param $id: UserId
+     */
+    public function showByUser($id) {
+        $user = User::where('users.id', $id)
+            ->join('persons', 'persons.id', 'users.person_id')
+            ->select('users.username', 'users.id as user', 'persons.*')->first();
+
+        if ($user)
+            return $this->showOne($user);
+        else
+            return $this->err('No se encontró el empleado', 404);
+    }
+
     public function update(Request $request, $id)
     {
         $e = Employ::findOrFail($id);
@@ -206,7 +219,7 @@ class EmployController extends ApiController
                 $refresToken->delete();
                 $token->delete();
             }
-            
+
             $e->user->save();
         } else {
             $e->status = Employ::STATUS_ACTIVO;
@@ -220,6 +233,8 @@ class EmployController extends ApiController
             return $this->err( 'No se ha cambiado el estado');
 
     }
+
+
 
     public function store_ruta(Request $request) {
         $request->validate([

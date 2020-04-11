@@ -15,8 +15,8 @@ class CreatePrendasTable extends Migration
     {
         Schema::create('prendas', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('img', 150)->nullable();
-            $table->string('detail', 200)->nullable();
+            $table->string('img', 60)->nullable();
+            $table->string('detail', 150)->nullable();
             $table->bigInteger('credit_id')->unsigned();
             $table->timestamps();
 

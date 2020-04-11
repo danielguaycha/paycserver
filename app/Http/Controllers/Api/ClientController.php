@@ -17,14 +17,27 @@ class ClientController extends ApiController
     {
         $this->clientService = new ClientService();
         $this->middleware('auth:api');
-        $this->middleware('admin')->only(['destroy', 'cancel']);
+        $this->middleware('admin')->only(['destroy', 'cancel', 'update']);
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $page = 1;
+        $limit = 10;
+        // page
+        if ($request->query('page'))
+            $page = $request->query('page');
+    
+        // limit
+        if($request->query('limit')) {
+            $limit = $request->query('limit');
+        }
+
+        $offset = (intval($page)-1) * intval($limit);
+
         $c = Person::where([
             ['status', '>', Person::STATUS_DELETE]
-        ])->orderBy('id', 'desc')->limit(30)->get();
+        ])->orderBy('id', 'desc')->limit($limit)->offset($offset)->get();
 
         return $this->showAll($c);
     }
@@ -63,7 +76,7 @@ class ClientController extends ApiController
         if($c->status < Person::STATUS_DELETE) {
             return $this->err('No se puede eliminar esta persona');
         }
-        
+
         $c->status = Person::STATUS_DELETE;
         if($c->save()) {
             return $this->success('Cliente eliminado con éxito');
@@ -71,7 +84,7 @@ class ClientController extends ApiController
         return $this->err('No ha podido eliminar el cliente');
     }
 
-    public function cancel($id) 
+    public function cancel($id)
     {
         $c = Person::findOrFail($id);
         $msg = '';
@@ -100,13 +113,13 @@ class ClientController extends ApiController
             return $this->showAll($c);
         }
 
-        $search = Str::lower($search);
+        $search = Str::upper($search);
 
         $c = Person::select('id', 'name', 'surname', 'address', 'status')
                     ->where([
                         ['id', '<>', 1],
                         ['status', '<>', Person::STATUS_DELETE],
-                        ['name', 'like', '%'.$search.'%'],                        
+                        ['name', 'like', '%'.$search.'%'],
                     ])
                     ->orWhere('surname', 'like', '%'.$search.'%')
                     ->limit(4)->get();

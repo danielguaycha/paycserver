@@ -13,21 +13,23 @@ class ClientService {
 
         $request->validate([
             'name'=> 'required|max:150',
-            'surname'=> 'string|max:100',
+            'surname'=> 'nullable|string|max:100',
             'address' => 'required',
             'email' => 'nullable|email',
-            'phones' => 'nullable|string'
+            'phones' => 'nullable|string|max:13',
+            'phones_b' => 'nullable|string|max:13'
         ], $this->messages());
-        
+
         $p = new Person();
-        $p->name = Str::lower($request->get('name'));
-        $p->surname = Str::lower($request->get('surname'));
+        $p->name = Str::upper($request->get('name'));
+        $p->surname = Str::upper($request->get('surname'));
         $p->address = $request->get('address');
         $p->phones = $request->get('phones');
+        $p->phones_b = $request->get('phones_b');
         $p->email = $request->get('email');
         $p->status = 1;
         $p->type = Person::TYPE_CLIENT;
-        
+
         if(!$p->save()) {
             DB::rollBack();
             return null;
@@ -40,18 +42,20 @@ class ClientService {
 
         $request->validate([
             'name'=> 'required|max:150',
-            'surname'=> 'string|max:100',
+            'surname'=> 'nullable|string|max:100',
             'address' => 'string|required',
             'email' => 'nullable|email',
-            'phones' => 'nullable|string'
+            'phones' => 'nullable|string|max:13',
+            'phones_b' => 'nullable|string|max:13'
         ], $this->messages());
 
 
         $p = Person::findOrFail($id);
-        $p->name = Str::lower($request->get('name'));
-        $p->surname = Str::lower($request->get('surname'));
+        $p->name = Str::upper($request->get('name'));
+        $p->surname = Str::upper($request->get('surname'));
         $p->address = $request->get('address');
         $p->phones = $request->get('phones');
+        $p->phones_b = $request->get('phones_b');
         $p->email = $request->get('email');
 
         if($p->isDirty()) {

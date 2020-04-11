@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Person;
+use App\Role;
 use App\Traits\TokenTrait;
 use App\User;
 use Illuminate\Http\Request;
@@ -62,13 +64,18 @@ class AuthController extends ApiController
     public function user(Request $request) {
 
         $userId = $request->user()->id;
-        $roles = $request->user()->hasRole('Admin');
-        $user = User::where('users.id', $userId)->join('persons', 'users.person_id', 'persons.id')
-            ->select('persons.name', 'persons.surname',  'persons.email',
-                'users.id', 'users.username', 'users.person_id', 'users.status')->get()->first();
-        $user->admin = $roles;
+        $root = $request->user()->hasRole(Role::ROOT);
+        $admin = $request->user()->hasRole(Role::ADMIN);  
+        
+        $data = User::find($userId);
+        $data->admin = $admin;
+        $data->root = $root;
+        $data->person = Person::find($request->user()->person_id);
 
-        return $this->ok($user);
+        return $this->custom([
+            'ok' => true,            
+            'data' => $data,            
+        ]);
     }
 
     public function changePw(Request $request) {

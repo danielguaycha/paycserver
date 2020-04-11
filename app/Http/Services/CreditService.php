@@ -87,10 +87,11 @@ class CreditService {
         $c->description = $calc['description']; // descripción
         $c->n_pagos = $calc['nPagos'];
 
+
         if($c->save()) {
             $this->storePayments($c->id, $calc, $c->f_inicio, $c->f_fin, $c->cobro);
             $this->storePrenda($request, $c->id);
-            DB::commit();
+            DB::rollBack();
             return $c;
         } else {
             DB::rollBack();
@@ -100,8 +101,13 @@ class CreditService {
 
     public function storePayments($credit_id, $calc, $fInit, $fEnd, $cobro){
         $date = Carbon::parse($fInit);
+        $n_pagos = $calc['nPagos'];
 
-        for($i = 0; $i < $calc['nPagos']; $i++) {
+        if ($calc['pagosDeLast'] !== 0) {
+            $n_pagos=$n_pagos-1;
+        }
+
+        for($i = 0; $i < $n_pagos; $i++) {
             $date_calc = $date->addDays(Credit::diasCobro($cobro));
             Payment::create([
                 'credit_id' => $credit_id,
@@ -119,7 +125,8 @@ class CreditService {
                 'credit_id' => $credit_id,
                 'total' => $calc['pagosDeLast'],
                 'status' => Payment::STATUS_ACTIVE,
-                'date' => $date_calc->format('Y-m-d')
+                'date' => $date_calc->format('Y-m-d'),
+                'description' => 'Pendiente'
             ]);
         }
     }
@@ -145,7 +152,7 @@ class CreditService {
         $c = Credit::findOrFail($id);
         $c->description = $request->get('description');
 
-        if( $c->user_id !== $request->user()->id ) {
+        if( $c->user_id !== $request->user()->id && !$request->user()->isAdmin() ) {
             return 'No tienes permiso para realizar esta acción';
         }
 

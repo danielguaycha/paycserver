@@ -17,54 +17,83 @@ class DatabaseSeeder extends Seeder
         DB::table("rutas")->insert(['name' => 'Zona 1']);
         DB::table("rutas")->insert(['name' => 'Zona 2']);
 
-        // create Admin Role and person
-
-        $id =  DB::table("persons")->insertGetId([
-            'name' => 'admin',
-            'surname' => 'root',
-            'status' => -999,
-            'address' => 'Local',
-            'phones' => '000000000, 000000000',
-            'email' => 'admin@mail.com'
-        ]);
-
-        $user = \App\User::create([
-            'person_id' => $id,
-            'username' => 'admin',
-            'password' => bcrypt('admin'),
-        ]);
-
+        // Crear Roles y permisos iniciales
         $this->call(PermitSeeder::class);
-        $user->assignRole('Admin');
+
+        // create Root Person
+        $root =  DB::table("persons")->insertGetId([
+            'name' => 'ROOT',
+            'surname' => '',
+            'status' => -999,
+            'address' => '',
+            'phones' => '000000000',
+            'phones_b' => '000000000',
+            'email' => 'root@mail.com'
+        ]);
+
+        $userRoot = \App\User::create([
+            'person_id' => $root,
+            'username' => 'root',
+            'password' => bcrypt('root'),
+        ]);
+
+        $userRoot->assignRole(\App\Role::ROOT);
 
 
-        // create employ for dev
+        // create employ and admin for dev
         if(config('app.debug')) {
-            $epId =  DB::table("persons")->insertGetId([
+            // personas
+            $employ =  DB::table("persons")->insertGetId([
                 'name' => 'employ',
                 'surname' => '1',
                 'status' => 1,
                 'address' => 'employ address',
-                'phones' => '000000000, 000000000',
+                'phones' => '000000000',
+                'phones_b' => '000000000',
                 'email' => 'employn@mail.com'
             ]);
 
-            $epUser = \App\User::create([
-                'person_id' => $epId,
-                'username' => 'user',
-                'password' => bcrypt('123'),
+            $admin =  DB::table("persons")->insertGetId([
+                'name' => 'ADMIN',
+                'surname' => '',
+                'status' => -999,
+                'address' => '',
+                'phones' => '000000000',
+                'phones_b' => '000000000',
+                'email' => 'admin@mail.com'
             ]);
 
+            // usuarios
+            $employUser = \App\User::create([
+                'person_id' => $employ,
+                'username' => 'user',
+                'password' => bcrypt('1234'),
+            ]);
+
+            $userAdmin = \App\User::create([
+                'person_id' => $admin,
+                'username' => 'admin',
+                'password' => bcrypt('admin'),
+            ]);
+
+            // empleados
             DB::table("employs")->insert([
-               'person_id' => $epId,
-               'user_id' => $epUser->id,
+               'person_id' => $employ,
+               'user_id' => $employUser->id,
                'sueldo' => 500,
                 'pago_sueldo' => \App\Employ::PAGO_SEMANAL,
             ]);
 
-            $epUser->rutas()->sync([1, 2]);
-            $epUser->assignRole('employ');
-        }
+            // roles, zonas
+            $employUser->rutas()->sync([1, 2]);
+            $employUser->assignRole(\App\Role::EMPLOY);
 
+            // Asignar Roles y permisos
+            $userAdmin->assignRole(\App\Role::ADMIN);
+
+
+            factory(App\Person::class, 100)->create();
+        }
     }
 }
+

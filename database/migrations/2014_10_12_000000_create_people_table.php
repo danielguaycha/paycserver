@@ -15,14 +15,16 @@ class CreatePeopleTable extends Migration
     {
         Schema::create('persons', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string("name", 150);
+            $table->string("name", 100);
             $table->string("surname",100)->nullable();
-            $table->string("address", 255)->nullable();
-            $table->string("phones", 100)->nullable();
-            $table->string("email", 150)->nullable();
+            $table->string("address", 100)->nullable();
+            $table->string("phones", 13)->nullable();
+            $table->string("phones_b", 13)->nullable();
+            $table->string("email", 100)->nullable();
             $table->integer("status")->default(1);
-            $table->string("type")->default(\App\Person::TYPE_CLIENT);
-
+            $table->string("type", 25)->default(\App\Person::TYPE_CLIENT);
+            $table->boolean('special')->default(false)->nullable();
+            $table->double('rank', 12, 2)->default(100.00);
             $table->timestamps();
         });
     }
@@ -37,3 +39,4 @@ class CreatePeopleTable extends Migration
         Schema::dropIfExists('persons');
     }
 }
+

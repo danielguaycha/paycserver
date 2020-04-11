@@ -31,6 +31,13 @@ class User extends Authenticatable
         return $this->belongsTo('App\Person');
     }
 
+    public function isAdmin() {
+        return $this->hasAnyRole([Role::ADMIN, Role::ROOT]);
+    }
+
+    public function isRoot() {
+        return $this->hasRole(Role::ROOT);
+    }
 
     public function rutas()
     {

@@ -106,6 +106,24 @@ class PaymentController extends ApiController
         return $this->showOne($credit);
     }
 
+    /**
+     * @param $id : credit_id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function showByCredit($id) {
+        $payments = Payment::where('credit_id', $id)           
+            ->select('payments.*')
+            ->orderBy('payments.date', 'asc')->get();
+
+        $totales = $payments->where('status', Payment::STATUS_PAID);
+
+        return $this->data([
+            'pagado' =>  $totales->sum('total'),
+            'n_pagos' => $totales->count(),
+            'pays' => $payments,
+        ]);
+    }
+
     public function update(Request $request, $id) {
         $request->validate([
             'status' => 'required|in:2,-1',
@@ -154,7 +172,7 @@ class PaymentController extends ApiController
 
         $payment->status = Payment::STATUS_ACTIVE;
         $payment->description = $request->description;
-        
+
         if($payment->save()) {
             return $this->success("Anulado exitosamente");
         }

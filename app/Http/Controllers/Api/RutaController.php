@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\ApiController;
+use App\Role;
 use App\Ruta;
 use Illuminate\Http\Request;
 
@@ -17,7 +18,7 @@ class RutaController extends ApiController
 
     public function index(Request $request)
     {
-        if($request->user()->hasRole('Admin')) {
+        if($request->user()->hasAnyRole([Role::ADMIN, Role::ROOT])) {
             $rutas = Ruta::select('id', 'name', 'status', 'description')
                 ->where('status', Ruta::STATUS_ACTIVE)->orderBy('id', 'desc')->get();
             return $this->showAll($rutas);

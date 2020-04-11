@@ -14,6 +14,10 @@ trait ApiResponse {
         return response()->json($data, $code);
     }
 
+    public function data($data, $code = 200) {
+        return response()->json(['ok'=> true, 'data'=> $data], $code);
+    }
+
     public function success($message) {
         return response()->json(['message' => $message, 'ok' => true], 200);
     }
