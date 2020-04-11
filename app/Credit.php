@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Credit extends Model
@@ -29,6 +30,14 @@ class Credit extends Model
 
     public function prenda() {
         return $this->hasMany('App\Prenda');
+    }
+
+    public static function diasInicio($cobro, $init = null) {
+        $dias = Credit::diasCobro($cobro);
+        if ($init === null)
+            return Carbon::now()->addDays($dias);
+        else
+            return Carbon::parse($init)->addDays($dias);
     }
 
     public static function diasPlazo($plazo) {

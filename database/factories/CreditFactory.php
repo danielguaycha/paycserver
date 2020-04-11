@@ -4,18 +4,45 @@
 
 use App\Credit;
 use Faker\Generator as Faker;
-use App\Http\Controllers\Api\CreditController;
+use App\Http\Services\CreditService;
 
 $factory->define(Credit::class, function (Faker $faker) {
 
-    $creditController = new CreditController();
+    $creditService = new CreditService();
 
-    $monto = $faker->randomFloat(2, 4);
+    $monto = $faker->randomFloat(2, 100, 999);
     $utilidad = $faker->randomElement([10, 20, 40]);
+
     $plazo = $faker->randomElement([Credit::PLAZO_SEMANAL, Credit::PLAZO_QUINCENAL,
         Credit::PLAZO_MENSUAL, Credit::PLAZO_MES_Y_MEDIO, Credit::PLAZO_OOS_MESES]);
-    $cobro = $faker->randomElement([Credit::COBRO_DIARIO, Credit::COBRO_SEMANAL,
-        Credit::COBRO_QUINCENAL, Credit::COBRO_MENSUAL]);
+
+    switch ($plazo){
+        case Credit::PLAZO_QUINCENAL:
+        case Credit::PLAZO_SEMANAL:
+            $cobro = Credit::COBRO_DIARIO;
+            break;
+        case Credit::PLAZO_MENSUAL:
+            $cobro = Credit::COBRO_SEMANAL;
+            break;
+        case Credit::PLAZO_OOS_MESES:
+            $cobro = Credit::COBRO_MENSUAL;
+            break;
+        case Credit::PLAZO_MES_Y_MEDIO:
+            $cobro = Credit::COBRO_QUINCENAL;
+            break;
+    }
+
+    $f_inicio = Credit::diasInicio($cobro)->format('Y-m-d');
+    $f_fin = Credit::diasInicio($cobro)->addDays(Credit::diasPlazo($plazo))->format('Y-m-d');
+
+    $total_utilidad = ($monto * ($utilidad/100)); // utilidad
+    $total = $monto + $total_utilidad; // total con utilidad
+
+    $calc = $creditService->calcCredit($plazo, $total, $cobro);
+    $pagos_de = $calc['pagosDe']; // pagos de $
+    $pagos_de_last = $calc['pagosDeLast']; // ultimo pago de $
+    $description = $calc['description']; // descripción
+    $n_pagos = $calc['nPagos'];
 
     return [
         'monto' => $monto,
@@ -29,5 +56,13 @@ $factory->define(Credit::class, function (Faker $faker) {
         'user_id' => $faker->randomElement([1, 2, 3]),
         'ruta_id' => $faker->randomElement([1, 2]),
         'address' => $faker->address,
+        'f_inicio' => $f_inicio,
+        'f_fin' => $f_fin,
+        'total_utilidad' => $total_utilidad,
+        'total' => $total,
+        'pagos_de'=>$pagos_de,
+        'pagos_de_last'=>$pagos_de_last,
+        'description'=>$description,
+        'n_pagos'=>$n_pagos,
     ];
 });

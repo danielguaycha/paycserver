@@ -67,12 +67,12 @@ class CreditService {
 
         // fechas
         if(!$request->get('f_inicio')) {
-            $c->f_inicio = Carbon::now()->format('Y-m-d');
-            $c->f_fin = Carbon::now()->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
+            $c->f_inicio = Credit::diasInicio($c->cobro)->format('Y-m-d');
+            $c->f_fin = Credit::diasInicio($c->cobro)->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
         }
         else{
-            $c->f_inicio = $request->get('f_inicio');
-            $c->f_fin = Carbon::parse($c->f_inicio)->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
+            $c->f_inicio = Credit::diasInicio($c->cobro, $request->get('f_inicio'))->format('Y-m-d');
+            $c->f_fin = Credit::diasInicio($c->cobro, $request->get('f_inicio'))->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
         }
 
         // Cálculos
@@ -91,7 +91,7 @@ class CreditService {
         if($c->save()) {
             $this->storePayments($c->id, $calc, $c->f_inicio, $c->f_fin, $c->cobro);
             $this->storePrenda($request, $c->id);
-            DB::rollBack();
+            DB::commit();
             return $c;
         } else {
             DB::rollBack();
@@ -188,7 +188,7 @@ class CreditService {
         ];
     }
 
-    private function calcCredit($plazo, $mount, $cobro) {
+    public function calcCredit($plazo, $mount, $cobro) {
         $diasPlazo = Credit::diasPlazo($plazo);
         $diasCobro = Credit::diasCobro($cobro);
         $numPagos = intval($diasPlazo / $diasCobro );
