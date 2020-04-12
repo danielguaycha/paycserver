@@ -24,6 +24,7 @@ Route::namespace('Api')->group(function () {
     // clients routes
     Route::get('client/search', 'ClientController@search');
     Route::put('client/cancel/{id}', 'ClientController@cancel');
+    Route::put('client/mora/{id}', 'ClientController@mora');
     Route::apiResource('client', 'ClientController');
 
     // credit routes

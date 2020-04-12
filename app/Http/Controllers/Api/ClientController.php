@@ -91,7 +91,7 @@ class ClientController extends ApiController
         if($c->status === Person::STATUS_DOWN) {
             $c->status = Person::STATUS_ACTIVE;
             $msg = 'ALTA';
-        }
+        }        
         else {
             $c->status = Person::STATUS_DOWN;
             $msg = 'BAJA';
@@ -103,19 +103,34 @@ class ClientController extends ApiController
         return $this->err('No ha podido cambiar el estado del cliente');
     }
 
+    public function mora($id, Request $request) {
+        $p = Person::findOrFail($id);
+        if ($request->user()->isRoot() && $p->mora === Person::MORA){
+            $p->mora = Person::NOMORA;        
+        } else {
+            $p->mora = Person::MORA;        
+        }
+        
+        if($p->save()) {
+            return $this->success('Estado de mora establecido');
+        }
+
+        return $this->err('No se ha podido cambiar el estado de mora');
+    }
+
     // custom methods
     public function search(Request $request) {
 
         $search = $request->query('q');
 
         if(!$search) {
-            $c = Person::select('id', 'name', 'surname', 'address', 'status')->limit(4)->orderBy('id', 'desc')->get();
+            $c = Person::select('id', 'name', 'surname', 'address', 'status', 'rank', 'mora')->limit(4)->orderBy('id', 'desc')->get();
             return $this->showAll($c);
         }
 
         $search = Str::upper($search);
 
-        $c = Person::select('id', 'name', 'surname', 'address', 'status')
+        $c = Person::select('id', 'name', 'surname', 'address', 'status', 'rank', 'mora')
                     ->where([
                         ['id', '<>', 1],
                         ['status', '<>', Person::STATUS_DELETE],

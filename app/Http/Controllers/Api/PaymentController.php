@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Credit;
 use App\Http\Controllers\ApiController;
 use App\Payment;
+use App\Person;
+use App\Ruta;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -26,14 +28,55 @@ class PaymentController extends ApiController
         if ($request->query('zone')){
             $zones = array($request->query('zone'));
         } else {
-            $zones = $request->user()->rutas->last()->pluck('id');
+            if ($request->user()->isAdmin()) {
+                $zones = Ruta::select('id')->where('status', Ruta::STATUS_ACTIVE)->get()->pluck('id');
+            } else {
+                $zones = $request->user()->rutas->last()->pluck('id');
+            }
             if(!$zones) return $this->err('Aun tienes rutas asignadas');
         }
+
         // validar los query's de date (Fecha del cobro), only(Solo un tipo de plazo de cobro), src (Para mapas)
         if($request->query('date')) {$date = $request->query('date');}
         if($request->query('only')) {$only = Str::lower($request->query('only'));}
         if($request->query('src')) { $src = Str::lower($request->query('src'));}
 
+        
+
+        if($only === 'all') { // en caso de que quieran todos los plazos
+   
+            $payment_diario = $this->getPayments($date, $zones, Credit::COBRO_DIARIO, $src);
+            $payment_semanal = $this->getPayments($date, $zones, Credit::COBRO_SEMANAL, $src);
+            $payment_quincenal = $this->getPayments($date, $zones, Credit::COBRO_QUINCENAL, $src);
+            $payment_mensual = $this->getPayments($date, $zones, Credit::COBRO_MENSUAL, $src);
+
+            return $this->ok([
+                'diario' => $payment_diario,
+                'semanal' => $payment_semanal,
+                'quincenal' => $payment_quincenal,
+                'mensual' => $payment_mensual
+            ]);
+        }
+
+        // en caso de que el plazo sea uno en especifico
+        if($only === 'diario') {
+            return $this->showAll($this->getPayments($date, $zones, Credit::COBRO_DIARIO, $src));
+        }
+
+        if($only === 'semanal') {
+            return $this->showAll($this->getPayments($date, $zones, Credit::COBRO_SEMANAL, $src));
+        }
+
+        if($only === 'quincenal') {
+            return $this->showAll($this->getPayments($date, $zones, Credit::COBRO_QUINCENAL, $src));
+        }
+
+        if($only === 'mensual') {
+            return $this->showAll($this->getPayments($date, $zones, Credit::COBRO_MENSUAL, $src));
+        }
+    }
+
+    public function getPayments ($date, $zones, $cobro = Credit::COBRO_DIARIO, $src = '') {
         // consulta base
         $payments = Payment::join('credits', 'credits.id', 'payments.credit_id')
             ->join('persons', 'persons.id', 'credits.person_id')
@@ -48,36 +91,7 @@ class PaymentController extends ApiController
                 'persons.name as client_name', 'persons.surname as client_surname');
         }
 
-        if($only === 'all') { // en caso de que quieran todos los plazos
-            $payment_diario = $payments->where('credits.cobro', Credit::COBRO_DIARIO)->get();
-            $payment_semanal = $payments->where('credits.cobro', Credit::COBRO_SEMANAL)->get();
-            $payment_quincenal = $payments->where('credits.cobro', Credit::COBRO_QUINCENAL)->get();
-            $payment_mensual = $payments->where('credits.cobro', Credit::COBRO_MENSUAL)->get();
-
-            return $this->ok([
-                'diario' => $payment_diario,
-                'semanal' => $payment_semanal,
-                'quincenal' => $payment_quincenal,
-                'mensual' => $payment_mensual
-            ]);
-        }
-
-        // en caso de que el plazo sea uno en especifico
-        if($only === 'diario') {
-            return $this->showAll($payments->where('credits.cobro', Credit::COBRO_DIARIO)->get());
-        }
-
-        if($only === 'semanal') {
-            return $this->showAll($payments->where('credits.cobro', Credit::COBRO_SEMANAL)->get());
-        }
-
-        if($only === 'quincenal') {
-            return $this->showAll($payments->where('credits.cobro', Credit::COBRO_QUINCENAL)->get());
-        }
-
-        if($only === 'mensual') {
-            return $this->showAll($payments->where('credits.cobro', Credit::COBRO_MENSUAL)->get());
-        }
+        return $payments->where('credits.cobro', $cobro)->get();
     }
 
     public function store(Request $request)
@@ -143,6 +157,8 @@ class PaymentController extends ApiController
         if($payment->status == -1) {
             $payment->mora =  true;
             $payment->description = ($request->get('description') ? $request->get('description') : 'Registrado con atraso o mora');
+            // Moratoria
+            $this->calificar($payment->credit_id);
         }
 
         $payment->date_payment = Carbon::now()->format('Y-m-d');
@@ -178,6 +194,16 @@ class PaymentController extends ApiController
         }
         return $this->err('No se ha podido anular el pago');
     }
+
+
+    private function calificar($creditId) {
+        $c = Credit::findOrFail($creditId);
+        $p = Person::findOrFail($c->person_id);
+
+        $p->rank = ($p->rank - Payment::POINT_BY_MORA);
+
+        $p->save();
+    }   
 
     /*
 

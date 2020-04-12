@@ -15,6 +15,9 @@ class Person extends Model
     const STATUS_DELETE = -1;
     const STATUS_DOWN = 0;
     const STATUS_ACTIVE = 1;
+    
+    const MORA = 1;
+    const NOMORA = 0;
 
     public function client() {
         return $this->hasOne('App\Client');

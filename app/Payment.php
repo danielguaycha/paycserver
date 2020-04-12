@@ -10,6 +10,8 @@ class Payment extends Model
     const STATUS_PAID = 2;
     const STATUS_FINISH = -1;
 
+    const POINT_BY_MORA = 2;
+
     public $timestamps = false;
     protected $fillable = [
         'credit_id', 'total', 'saldo', 'date',  'date_payment', 'description'

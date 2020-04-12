@@ -39,6 +39,11 @@ class CreditController extends ApiController
 
         $offset = ($page-1) * $limit;
 
+        $personId = $request->query('person_id');
+        if ($personId) {
+            array_push($wheres, ['person_id', $personId]);
+        }
+
         // plazo
         $plazo = $request->query('plazo');
         if($plazo) { array_push($wheres, ['plazo', Str::upper($plazo)]); }
@@ -48,7 +53,7 @@ class CreditController extends ApiController
         if($cobro) { array_push($wheres, ['cobro', Str::upper($cobro)]); }
 
         $credit = Credit::join('persons', 'persons.id', 'credits.person_id')
-            ->join('rutas', 'rutas.id', 'credits.ruta_id');
+            ->join('rutas', 'rutas.id', 'credits.ruta_id');            
 
         // query search
         $query = $request->query('q');
@@ -154,8 +159,8 @@ class CreditController extends ApiController
         }
     }
 
-    public function showMap($id) {
-
+    public function showMap($id) 
+    {
 
     }
 
