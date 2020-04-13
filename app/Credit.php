@@ -35,9 +35,123 @@ class Credit extends Model
     public static function diasInicio($cobro, $init = null) {
         $dias = Credit::diasCobro($cobro);
         if ($init === null)
-            return Carbon::now()->addDays($dias);
+            return Credit::addDays($dias);
         else
-            return Carbon::parse($init)->addDays($dias);
+            return Credit::addDays($dias, $init);
+    }
+
+    public static function addDays2($days = 1, $date = null) {        
+        if(!$date) {
+            $d = Carbon::now();
+        }
+        else {
+            $d = Carbon::parse($date);
+        }
+
+        if($d->isSaturday()){
+            $d = $d->addDays(2);
+            echo '-- es sabado add 2 ---';
+            if ($days === 1)
+                $days--;
+        }
+
+        else if ($d->isSunday()) {
+            $d = $d->addDays(1);
+            echo '-- es domingo add 1 ---';
+            if ($days === 1)
+                $days--;
+        }
+    
+        else if(!$d->isSaturday() && !$d->isSunday() && $days === 1) {            
+            echo '-- agregamos 1 ---';
+            $d = $d->addDay();
+        }
+
+        //echo "------".$d->format('Y-m-d').'--------';
+        //echo " ---- dias hasta aqui $days ----";
+        if($days>= 15 && $days < 30) {
+            $days = $days - 2;            
+        }
+
+        if($days >= 30) {
+            $days = $days - 3;            
+        }
+
+        for($i = 1; $i<$days; $i++) {
+            $d = $d->addDay();
+            if($d->isSaturday()){
+                $d = $d->addDay();
+            }
+        }
+        return $d;
+        
+        /*if ($d->isSunday()) {
+            $d = $d->addDays($days+1);
+        }
+        else {
+            $d = $d->addDays($days);
+        }
+        return $d;*/
+    }
+
+    public static function addDays($days = 1, $date = null) {
+        if(!$date) {
+            $d = Carbon::now();
+        }
+        else {
+            $d = Carbon::parse($date);
+        }
+        switch($days) {
+            case 1: 
+                if($d->isSaturday()){
+                    $d = $d->addDays(2);
+                }
+                else if ($d->isSunday()) {
+                    $d = $d->addDays(1);                                                            
+                }    
+                else if(!$d->isSaturday() && !$d->isSunday()) {                                
+                    $d = $d->addDay();
+                }
+            break;
+            case 7:
+                $dateInit = self::remplaceWeekend($d);
+                $d = $dateInit->addDays(7);                
+            break;
+            case 15:
+                $dateInit = self::remplaceWeekend($d);
+                $d = $dateInit->addDays(15);  
+            break;
+            case 30:
+                $dateInit = self::remplaceWeekend($d);
+                $d = $dateInit->addDays(30);  
+            break;
+        }
+        return self::remplaceWeekend($d);
+    }
+
+    public static function  remplaceWeekend ($date) {
+        $d = Carbon::parse($date);        
+        if($d->isSunday()) {
+            $d = $d->addDays(1);                                                            
+        }
+
+        return $d;
+    }
+
+    public static function dateEnd($days=7, $date) {
+        $d = Carbon::parse($date);    
+
+        if($d->isSaturday()){
+            $d = $d->addDays(2);
+        }
+
+        for($i = 1; $i<$days; $i++) {
+            $d = $d->addDay();
+            if($d->isSaturday()){
+                $d = $d->addDay();
+            }
+        }
+        return $d;
     }
 
     public static function diasPlazo($plazo) {

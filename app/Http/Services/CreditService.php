@@ -67,12 +67,18 @@ class CreditService {
 
         // fechas
         if(!$request->get('f_inicio')) {
-            $c->f_inicio = Credit::diasInicio($c->cobro)->format('Y-m-d');
-            $c->f_fin = Credit::diasInicio($c->cobro)->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
+
+            $finicio = Credit::diasInicio($c->cobro);
+
+            $c->f_inicio = $finicio->format('Y-m-d');            
+            $c->f_fin = Credit::dateEnd(Credit::diasPlazo($c->plazo), $finicio)->format('Y-m-d');
+            
         }
         else{
-            $c->f_inicio = Credit::diasInicio($c->cobro, $request->get('f_inicio'))->format('Y-m-d');
-            $c->f_fin = Credit::diasInicio($c->cobro, $request->get('f_inicio'))->addDays(Credit::diasPlazo($c->plazo))->format('Y-m-d');
+            $finicio = Credit::diasInicio($c->cobro, $request->get('f_inicio'));
+
+            $c->f_inicio = $finicio->format('Y-m-d');
+            $c->f_fin = Credit::dateEnd(Credit::diasPlazo($c->plazo), $finicio)->format('Y-m-d');
         }
 
         // Cálculos
@@ -107,9 +113,15 @@ class CreditService {
             $n_pagos=$n_pagos-1;
         }
 
+        $pay=1;
         for($i = 0; $i < $n_pagos; $i++) {
-            $date_calc = $date->addDays(Credit::diasCobro($cobro));
+            if ($i === 0) {
+                $date_calc = $date;
+            } else {
+                $date_calc = Credit::addDays(Credit::diasCobro($cobro), $date);                
+            }
             Payment::create([
+                'number' => $pay,
                 'credit_id' => $credit_id,
                 'total' => $calc['pagosDe'],
                 'status' => Payment::STATUS_ACTIVE,
@@ -117,11 +129,13 @@ class CreditService {
                 'description' => 'Pendiente'
             ]);
             $date = $date_calc;
+            $pay++;
         }
 
         if($calc['pagosDeLast'] !== 0) {
-            $date_calc = $date->addDays(Credit::diasCobro($cobro));
+            $date_calc = Credit::addDays(Credit::diasCobro($cobro), $date);
             Payment::create([
+                'number' => $pay,
                 'credit_id' => $credit_id,
                 'total' => $calc['pagosDeLast'],
                 'status' => Payment::STATUS_ACTIVE,

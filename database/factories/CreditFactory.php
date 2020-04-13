@@ -5,6 +5,7 @@
 use App\Credit;
 use Faker\Generator as Faker;
 use App\Http\Services\CreditService;
+use Carbon\Carbon;
 
 $factory->define(Credit::class, function (Faker $faker) {
 
@@ -32,8 +33,15 @@ $factory->define(Credit::class, function (Faker $faker) {
             break;
     }
 
-    $f_inicio = Credit::diasInicio($cobro)->format('Y-m-d');
-    $f_fin = Credit::diasInicio($cobro)->addDays(Credit::diasPlazo($plazo))->format('Y-m-d');
+    $created_at = $faker->randomElement(
+        [
+            '2020-04-01',
+            '2020-04-02', '2020-04-03', '2020-04-04', '2020-04-06','2020-04-09', '2020-04-11', '2020-04-13'
+        ]);
+    $finicio = Credit::diasInicio($cobro, $created_at);
+    
+    $f_inicio = $finicio->format('Y-m-d');
+    $f_fin = Credit::dateEnd(Credit::diasPlazo($plazo), $finicio)->format('Y-m-d');
 
     $total_utilidad = ($monto * ($utilidad/100)); // utilidad
     $total = $monto + $total_utilidad; // total con utilidad
@@ -64,5 +72,6 @@ $factory->define(Credit::class, function (Faker $faker) {
         'pagos_de_last'=>$pagos_de_last,
         'description'=>$description,
         'n_pagos'=>$n_pagos,
+        'created_at' => Carbon::parse($created_at),
     ];
 });

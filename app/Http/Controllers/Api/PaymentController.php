@@ -87,7 +87,10 @@ class PaymentController extends ApiController
                 'payments.credit_id', 'payments.id', 'persons.name as client_name', 'persons.surname as client_surname');
         } else { // selección para vista normal
             $payments->select('credits.cobro', 'credits.address',
-                'payments.id', 'payments.credit_id', 'payments.total', 'payments.status', 'payments.mora',
+                'credits.geo_lon as lon', 'credits.geo_lat as lat',
+                'credits.ref_detail', 'credits.ref_img',
+                'payments.id', 'payments.credit_id', 'payments.total', 
+                'payments.status', 'payments.mora', 'payments.number',
                 'persons.name as client_name', 'persons.surname as client_surname');
         }
 

@@ -45,6 +45,10 @@ Route::namespace('Api')->group(function () {
 
     // payroll
     Route::apiResource('payroll', 'PayRollController');
+
+
+    // prueba
+    Route::get('prueba', 'CreditController@calcDate');
 });
 
-Route::get('image/{path}/{filename}', 'AdminController@viewImg');
+//Route::get('image/{path}/{filename}', 'AdminController@viewImg');
