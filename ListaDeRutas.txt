@@ -1,0 +1,72 @@
++--------+-----------+-------------------------------+---------------------+------------------------------------------------------------------------+----------------+
+| Domain | Method    | URI                           | Name                | Action                                                                 | Middleware     |
++--------+-----------+-------------------------------+---------------------+------------------------------------------------------------------------+----------------+
+|        | GET|HEAD  | /                             |                     | Closure                                                                | web            |
+|        | GET|HEAD  | api/client                    | client.index        | App\Http\Controllers\Api\ClientApiController@index                     | api,auth:api   |
+|        | POST      | api/client                    | client.store        | App\Http\Controllers\Api\ClientApiController@store                     | api,auth:api   |
+|        | GET|HEAD  | api/client/search             |                     | App\Http\Controllers\Api\ClientApiController@search                    | api,auth:api   |
+|        | GET|HEAD  | api/client/{client}           | client.show         | App\Http\Controllers\Api\ClientApiController@show                      | api,auth:api   |
+|        | PUT|PATCH | api/client/{client}           | client.update       | App\Http\Controllers\Api\ClientApiController@update                    | api,auth:api   |
+|        | GET|HEAD  | api/credit                    | credit.index        | App\Http\Controllers\Api\CreditApiController@index                     | api,auth:api   |
+|        | POST      | api/credit                    | credit.store        | App\Http\Controllers\Api\CreditApiController@store                     | api,auth:api   |
+|        | PUT       | api/credit/cancel             |                     | App\Http\Controllers\Api\CreditApiController@cancel                    | api,auth:api   |
+|        | PUT       | api/credit/end/{id}           |                     | App\Http\Controllers\Api\CreditApiController@finish                    | api,auth:api   |
+|        | GET|HEAD  | api/credit/search             |                     | App\Http\Controllers\Api\CreditApiController@search                    | api,auth:api   |
+|        | PUT|PATCH | api/credit/{credit}           | credit.update       | App\Http\Controllers\Api\CreditApiController@update                    | api,auth:api   |
+|        | GET|HEAD  | api/credit/{credit}           | credit.show         | App\Http\Controllers\Api\CreditApiController@show                      | api,auth:api   |
+|        | POST      | api/expense                   | expense.store       | App\Http\Controllers\Api\ExpenseController@store                       | api,auth:api   |
+|        | GET|HEAD  | api/expense                   | expense.index       | App\Http\Controllers\Api\ExpenseController@index                       | api,auth:api   |
+|        | DELETE    | api/expense/{expense}         | expense.destroy     | App\Http\Controllers\Api\ExpenseController@destroy                     | api,auth:api   |
+|        | PUT|PATCH | api/expense/{expense}         | expense.update      | App\Http\Controllers\Api\ExpenseController@update                      | api,auth:api   |
+|        | GET|HEAD  | api/expense/{expense}         | expense.show        | App\Http\Controllers\Api\ExpenseController@show                        | api,auth:api   |
+|        | POST      | api/login                     |                     | App\Http\Controllers\AuthController@login                              | api            |
+|        | POST      | api/logout                    |                     | App\Http\Controllers\AuthController@logout                             | api,auth:api   |
+|        | POST      | api/oauth/token               |                     | Laravel\Passport\Http\Controllers\AccessTokenController@issueToken     | api            |
+|        | POST      | api/payment                   | payment.store       | App\Http\Controllers\Api\PaymentController@store                       | api,auth:api   |
+|        | GET|HEAD  | api/payment                   | payment.index       | App\Http\Controllers\Api\PaymentController@index                       | api,auth:api   |
+|        | GET|HEAD  | api/payment/{payment}         | payment.show        | App\Http\Controllers\Api\PaymentController@show                        | api,auth:api   |
+|        | DELETE    | api/payment/{payment}         | payment.destroy     | App\Http\Controllers\Api\PaymentController@destroy                     | api,auth:api   |
+|        | PUT|PATCH | api/payment/{payment}         | payment.update      | App\Http\Controllers\Api\PaymentController@update                      | api,auth:api   |
+|        | GET|HEAD  | api/route                     | route.index         | App\Http\Controllers\Api\RutaApiController@index                       | api,auth:api   |
+|        | POST      | api/route                     | route.store         | App\Http\Controllers\Api\RutaApiController@store                       | api,auth:api   |
+|        | GET|HEAD  | api/user                      |                     | App\Http\Controllers\AuthController@user                               | api,auth:api   |
+|        | POST      | api/user/password             |                     | App\Http\Controllers\AuthController@changePw                           | api,auth:api   |
+|        | POST      | employ                        | employ.store        | App\Http\Controllers\EmployController@store                            | web,auth,admin |
+|        | GET|HEAD  | employ                        | employ.index        | App\Http\Controllers\EmployController@index                            | web,auth,admin |
+|        | GET|HEAD  | employ/create                 | employ.create       | App\Http\Controllers\EmployController@create                           | web,auth,admin |
+|        | GET|HEAD  | employ/ruta                   | employ.assign_route | App\Http\Controllers\EmployController@assign_ruta                      | web,auth,admin |
+|        | POST      | employ/ruta                   | employ.store_route  | App\Http\Controllers\EmployController@store_ruta                       | web,auth,admin |
+|        | GET|HEAD  | employ/{employ}               | employ.show         | App\Http\Controllers\EmployController@show                             | web,auth,admin |
+|        | DELETE    | employ/{employ}               | employ.destroy      | App\Http\Controllers\EmployController@destroy                          | web,auth,admin |
+|        | PUT|PATCH | employ/{employ}               | employ.update       | App\Http\Controllers\EmployController@update                           | web,auth,admin |
+|        | GET|HEAD  | employ/{employ}/edit          | employ.edit         | App\Http\Controllers\EmployController@edit                             | web,auth,admin |
+|        | PUT       | employ/{id}/cancel            | employ.cancel       | App\Http\Controllers\EmployController@cancel                           | web,auth,admin |
+|        | GET|HEAD  | home                          | home                | App\Http\Controllers\HomeController@index                              | web,auth       |
+|        | POST      | login                         |                     | App\Http\Controllers\Auth\LoginController@login                        | web,guest      |
+|        | GET|HEAD  | login                         | login               | App\Http\Controllers\Auth\LoginController@showLoginForm                | web,guest      |
+|        | POST      | logout                        | logout              | App\Http\Controllers\Auth\LoginController@logout                       | web            |
+|        | GET|HEAD  | password/confirm              | password.confirm    | App\Http\Controllers\Auth\ConfirmPasswordController@showConfirmForm    | web,auth       |
+|        | POST      | password/confirm              |                     | App\Http\Controllers\Auth\ConfirmPasswordController@confirm            | web,auth       |
+|        | POST      | password/email                | password.email      | App\Http\Controllers\Auth\ForgotPasswordController@sendResetLinkEmail  | web            |
+|        | POST      | password/reset                | password.update     | App\Http\Controllers\Auth\ResetPasswordController@reset                | web            |
+|        | GET|HEAD  | password/reset                | password.request    | App\Http\Controllers\Auth\ForgotPasswordController@showLinkRequestForm | web            |
+|        | GET|HEAD  | password/reset/{token}        | password.reset      | App\Http\Controllers\Auth\ResetPasswordController@showResetForm        | web            |
+|        | GET|HEAD  | register                      | register            | App\Http\Controllers\Auth\RegisterController@showRegistrationForm      | web,guest      |
+|        | POST      | register                      |                     | App\Http\Controllers\Auth\RegisterController@register                  | web,guest      |
+|        | GET|HEAD  | rol                           | rol.index           | App\Http\Controllers\RoleController@index                              | web            |
+|        | POST      | rol                           | rol.store           | App\Http\Controllers\RoleController@store                              | web            |
+|        | GET|HEAD  | rol/create                    | rol.create          | App\Http\Controllers\RoleController@create                             | web            |
+|        | GET|HEAD  | rol/{rol}                     | rol.show            | App\Http\Controllers\RoleController@show                               | web            |
+|        | PUT|PATCH | rol/{rol}                     | rol.update          | App\Http\Controllers\RoleController@update                             | web            |
+|        | DELETE    | rol/{rol}                     | rol.destroy         | App\Http\Controllers\RoleController@destroy                            | web            |
+|        | GET|HEAD  | rol/{rol}/edit                | rol.edit            | App\Http\Controllers\RoleController@edit                               | web            |
+|        | GET|HEAD  | ruta                          | ruta.index          | App\Http\Controllers\RutaController@index                              | web,auth       |
+|        | POST      | ruta                          | ruta.store          | App\Http\Controllers\RutaController@store                              | web,auth,admin |
+|        | GET|HEAD  | ruta/create                   | ruta.create         | App\Http\Controllers\RutaController@create                             | web,auth,admin |
+|        | GET|HEAD  | ruta/{rutum}                  | ruta.show           | App\Http\Controllers\RutaController@show                               | web,auth,admin |
+|        | PUT|PATCH | ruta/{rutum}                  | ruta.update         | App\Http\Controllers\RutaController@update                             | web,auth,admin |
+|        | DELETE    | ruta/{rutum}                  | ruta.destroy        | App\Http\Controllers\RutaController@destroy                            | web,auth,admin |
+|        | GET|HEAD  | ruta/{rutum}/edit             | ruta.edit           | App\Http\Controllers\RutaController@edit                               | web,auth,admin |
+|        | GET|HEAD  | storage/{pathFile}/{filename} |                     | App\Http\Controllers\AdminController@viewImg                           | web            |
++--------+-----------+-------------------------------+---------------------+------------------------------------------------------------------------+----------------+
+
