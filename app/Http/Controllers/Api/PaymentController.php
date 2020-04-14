@@ -90,7 +90,8 @@ class PaymentController extends ApiController
                 'credits.geo_lon as lon', 'credits.geo_lat as lat',
                 'credits.ref_detail', 'credits.ref_img',
                 'payments.id', 'payments.credit_id', 'payments.total', 
-                'payments.status', 'payments.mora', 'payments.number',
+                'payments.status', 'payments.mora', 'payments.number', 'payments.description',
+                'persons.id as client_id',
                 'persons.name as client_name', 'persons.surname as client_surname');
         }
 

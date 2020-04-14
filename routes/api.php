@@ -51,4 +51,4 @@ Route::namespace('Api')->group(function () {
     Route::get('prueba', 'CreditController@calcDate');
 });
 
-//Route::get('image/{path}/{filename}', 'AdminController@viewImg');
+Route::get('image/{path}/{filename}', 'AdminController@viewImg');

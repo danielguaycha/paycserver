@@ -72,6 +72,8 @@ $factory->define(Credit::class, function (Faker $faker) {
         'pagos_de_last'=>$pagos_de_last,
         'description'=>$description,
         'n_pagos'=>$n_pagos,
+        'ref_img' => $faker->randomElement(['ref/1586720580.jpg', null]),
+        'ref_detail' => 'Detalle de referencia',
         'created_at' => Carbon::parse($created_at),
     ];
 });
