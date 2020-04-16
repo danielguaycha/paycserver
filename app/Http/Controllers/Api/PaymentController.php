@@ -60,19 +60,19 @@ class PaymentController extends ApiController
 
         // en caso de que el plazo sea uno en especifico
         if($only === 'diario') {
-            return $this->showAll($this->getPayments($date, $zones, Credit::COBRO_DIARIO, $src));
+            return $this->ok(['diario' => $this->getPayments($date, $zones, Credit::COBRO_DIARIO, $src)]);
         }
 
         if($only === 'semanal') {
-            return $this->showAll($this->getPayments($date, $zones, Credit::COBRO_SEMANAL, $src));
+            return $this->ok(['semanal' => $this->getPayments($date, $zones, Credit::COBRO_SEMANAL, $src)]);
         }
 
         if($only === 'quincenal') {
-            return $this->showAll($this->getPayments($date, $zones, Credit::COBRO_QUINCENAL, $src));
+            return $this->ok(['quincenal' => $this->getPayments($date, $zones, Credit::COBRO_QUINCENAL, $src)]);
         }
 
         if($only === 'mensual') {
-            return $this->showAll($this->getPayments($date, $zones, Credit::COBRO_MENSUAL, $src));
+            return $this->ok(['mensual' => $this->getPayments($date, $zones, Credit::COBRO_MENSUAL, $src)]);
         }
     }
 

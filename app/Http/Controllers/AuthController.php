@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Person;
 use App\Role;
+use App\Ruta;
 use App\Traits\TokenTrait;
 use App\User;
 use Illuminate\Http\Request;
@@ -67,10 +68,19 @@ class AuthController extends ApiController
         $root = $request->user()->hasRole(Role::ROOT);
         $admin = $request->user()->hasRole(Role::ADMIN);  
         
-        $data = User::find($userId);
+        $data = User::findOrFail($userId);
         $data->admin = $admin;
         $data->root = $root;
         $data->person = Person::find($request->user()->person_id);
+        
+        if($request->user()->isAdmin()) {
+            $data->zones = Ruta::select('id', 'name')->where('status', Ruta::STATUS_ACTIVE)->get();
+        } else {
+            $data->zones = $request->user()->rutas()
+                ->where('status', Ruta::STATUS_ACTIVE)
+                ->select("id", "name")->get();
+        }
+        
 
         return $this->custom([
             'ok' => true,            
