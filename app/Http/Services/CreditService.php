@@ -70,9 +70,9 @@ class CreditService {
 
             $finicio = Credit::diasInicio($c->cobro);
 
-            $c->f_inicio = $finicio->format('Y-m-d');            
+            $c->f_inicio = $finicio->format('Y-m-d');
             $c->f_fin = Credit::dateEnd(Credit::diasPlazo($c->plazo), $finicio)->format('Y-m-d');
-            
+
         }
         else{
             $finicio = Credit::diasInicio($c->cobro, $request->get('f_inicio'));
@@ -118,7 +118,7 @@ class CreditService {
             if ($i === 0) {
                 $date_calc = $date;
             } else {
-                $date_calc = Credit::addDays(Credit::diasCobro($cobro), $date);                
+                $date_calc = Credit::addDays(Credit::diasCobro($cobro), $date);
             }
             Payment::create([
                 'number' => $pay,
@@ -216,6 +216,10 @@ class CreditService {
             if($totalIdeal < $mount) {
                 $diferencia = $mount - $totalIdeal;
                 $pagosDeLast = round($pagosDe + $diferencia, 2);
+                $numPagos--;
+            } else {
+                $diferencia = $totalIdeal - $mount;
+                $pagosDeLast = round($pagosDe - $diferencia, 2);
                 $numPagos--;
             }
         }

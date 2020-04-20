@@ -23,7 +23,8 @@ class AuthController extends ApiController
         $this->client = Client::where("password_client", true)->first();
         $this->middleware("auth:api")->only(['user', 'logout', 'refresh', 'changePw']);
     }
-
+    //! En desuso, cambiado a ApiLoginController
+    //TODO : Eliminar esta función Luego de hacer las pruebas
     public function login(Request $request) {
 
         $this->validate($request, [
@@ -37,7 +38,7 @@ class AuthController extends ApiController
             return $this->err('Acceso denegado', 401);
         }
 
-        $requestToken = $this->issueToken($request, 'password');
+        $requestToken = $this->getCustom($request, 'password');
 
         if($requestToken !== null)
             return $requestToken;
@@ -59,20 +60,20 @@ class AuthController extends ApiController
             ->where('access_token_id', $accessToken->id)
             ->update(['revoked' => true]);
         $accessToken->revoke();
-        return response()->json([], 204);
+        return response()->json(['ok'=> true], 204);
     }
 
     public function user(Request $request) {
 
         $userId = $request->user()->id;
         $root = $request->user()->hasRole(Role::ROOT);
-        $admin = $request->user()->hasRole(Role::ADMIN);  
-        
+        $admin = $request->user()->hasRole(Role::ADMIN);
+
         $data = User::findOrFail($userId);
         $data->admin = $admin;
         $data->root = $root;
         $data->person = Person::find($request->user()->person_id);
-        
+
         if($request->user()->isAdmin()) {
             $data->zones = Ruta::select('id', 'name')->where('status', Ruta::STATUS_ACTIVE)->get();
         } else {
@@ -80,11 +81,11 @@ class AuthController extends ApiController
                 ->where('status', Ruta::STATUS_ACTIVE)
                 ->select("id", "name")->get();
         }
-        
+
 
         return $this->custom([
-            'ok' => true,            
-            'data' => $data,            
+            'ok' => true,
+            'data' => $data,
         ]);
     }
 

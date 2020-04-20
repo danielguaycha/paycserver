@@ -27,12 +27,12 @@ class CreditController extends ApiController
     {
         $page = 1;
         $wheres = [];
-        $limit = 10;
+        $limit = 20;
 
         // page
         if ($request->query('page'))
             $page = $request->query('page');
-    
+
         // limit
         if($request->query('limit')) {
             $limit = $request->query('limit');
@@ -54,7 +54,7 @@ class CreditController extends ApiController
         if($cobro) { array_push($wheres, ['cobro', Str::upper($cobro)]); }
 
         $credit = Credit::join('persons', 'persons.id', 'credits.person_id')
-            ->join('rutas', 'rutas.id', 'credits.ruta_id');            
+            ->join('rutas', 'rutas.id', 'credits.ruta_id');
 
         // query search
         $query = $request->query('q');
@@ -78,7 +78,7 @@ class CreditController extends ApiController
                 DB::raw("CONCAT(persons.name, ' ' ,persons.surname) AS client"), 'rutas.name as ruta')
             ->where($wheres)->whereIn('credits.ruta_id', $zones)
             ->orderBy('id', 'desc')
-            ->limit($limit)->offset($offset)->get();           
+            ->limit($limit)->offset($offset)->get();
         }
 
         // para administrador
@@ -88,7 +88,7 @@ class CreditController extends ApiController
                 DB::raw("CONCAT(persons.name, ' ' ,persons.surname) AS client"), 'rutas.name as ruta')
             ->where($wheres)
             ->orderBy('id', 'desc')
-            ->limit($limit)->offset($offset)->get();            
+            ->limit($limit)->offset($offset)->get();
         }
 
         if (!$query)
@@ -160,7 +160,7 @@ class CreditController extends ApiController
         }
     }
 
-    public function showMap($id) 
+    public function showMap($id)
     {
 
     }

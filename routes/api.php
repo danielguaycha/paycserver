@@ -1,12 +1,10 @@
 <?php
 
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 
 // auth routes
 Route::post('oauth/token', '\Laravel\Passport\Http\Controllers\AccessTokenController@issueToken');
-Route::post('login', 'AuthController@login');
+Route::post('login', 'ApiLoginController@login');
 Route::post('logout', 'AuthController@logout');
 Route::post('user/password', 'AuthController@changePw');
 Route::get('user', 'AuthController@user');
