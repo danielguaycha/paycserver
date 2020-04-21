@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Str;
-
 return [
 
     /*
@@ -32,6 +31,8 @@ return [
     | choice installed on your machine before you begin development.
     |
     */
+
+
 
     'connections' => [
 
