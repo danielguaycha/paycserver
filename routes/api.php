@@ -47,6 +47,15 @@ Route::namespace('Api')->group(function () {
 
     // prueba
     Route::get('prueba', 'CreditController@calcDate');
+
+    // Apk updater
+    Route::get('/updater', 'AppUpdateController@index');
+    Route::post('/updater', 'AppUpdateController@store');
+    Route::post('/updater/{id}', 'AppUpdateController@update');
+    Route::put('/updater/cancel/{id}', 'AppUpdateController@cancel');
+    Route::delete('/updater/{id}', 'AppUpdateController@destroy');
+    Route::post('/updates', 'AppUpdateController@getUpdate');
+    Route::get('/updates/{build}', 'AppUpdateController@downloadUpdate');
 });
 
 Route::get('image/{path}/{filename}', 'AdminController@viewImg');
