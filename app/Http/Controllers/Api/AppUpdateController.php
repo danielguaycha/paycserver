@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
+
 
 class AppUpdateController extends ApiController
 {
@@ -18,8 +21,8 @@ class AppUpdateController extends ApiController
 
     public function __construct()
     {
-        $this->middleware('auth:api');
-        $this->middleware("root")->except(['getUpdate']);
+        $this->middleware('auth:api')->except(['downloadUpdateTemp']);
+        $this->middleware("root")->except(['getUpdate', 'downloadUpdate', 'last', 'downloadUpdateTemp']);
     }
 
     public function index(Request $request)
@@ -144,8 +147,7 @@ class AppUpdateController extends ApiController
             'build' => 'required|numeric',
         ]);
 
-        $up = AppUpdate::select('id', 'src', 'created_at', 'version')
-            ->where('build', '>', $request->build)
+        $up = AppUpdate::where('build', '>', $request->build)
 			->where('status', 1)
             ->orderBy('build', 'desc')->first();
 
@@ -168,6 +170,8 @@ class AppUpdateController extends ApiController
                 'ok' => true,
                 'data'=> [
                     'update' => true,
+                    'build'=> $up->build,
+                    'description' => $up->description,
                     'src' => $up->src,
 					'version' => $up->version,
                     'last' => Carbon::parse($up->created_at)->format('Y-m-d')
@@ -176,25 +180,50 @@ class AppUpdateController extends ApiController
         }
     }
 
-    public function downloadUpdate($build) {
+    public function downloadUpdate($path, $filename) {
 
-        $up = AppUpdate::where([
-            ['status', 1],
-            ['build', '>', $build]
-        ])->orderBy('build', 'desc')->first();
-
-        $path = storage_path('app'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.$up->src);
+        $path = storage_path('app'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$filename);
         if (!File::exists($path)) {
             abort(404);
         }
+        $name = basename($path);
+        //$file = \Illuminate\Support\Facades\File::get($path);
+        //$type = \Illuminate\Support\Facades\File::mimeType($path);
 
-        $file = \Illuminate\Support\Facades\File::get($path);
-        $type = \Illuminate\Support\Facades\File::mimeType($path);
+        //$response = Response::make($file, 200);
+        //$response->header("Content-Type", $type);
+        return Response::download($path, $name, [
+            'Content-Length: '. filesize($path)
+        ]);
+    }
 
-        $response = Response::make($file, 200);
-        $response->header("Content-Type", $type);
+    public function downloadUpdateTemp($path, $filename, Request $request) {
 
-        return $response;
+        if (!$request->hasValidSignature()) {
+            abort(404);
+        }
+
+        $path = storage_path('app'.DIRECTORY_SEPARATOR.'public'.DIRECTORY_SEPARATOR.$path.DIRECTORY_SEPARATOR.$filename);
+        if (!File::exists($path)) {
+            abort(404);
+        }
+        $name = basename($path);
+        return Response::download($path, $name, [
+            'Content-Length: '. filesize($path)
+        ]);
+    }
+
+    public function last() {
+        $up = AppUpdate::where('status', 1)->orderBy('build', 'desc')->first();
+        if(!$up){
+            return $this->err("No hay builds disponibles");
+        }
+
+        $url = URL::temporarySignedRoute(
+            'updates.temp', now()->addMinutes(10), ['path' => 'apk', 'filename'=> Str::replaceFirst('apk/','', $up->src)]
+        );
+
+        return $this->data(['url' => $url]);
     }
 
     public function existBuild($build) {

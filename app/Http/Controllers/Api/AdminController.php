@@ -24,7 +24,6 @@ class AdminController extends Controller
 
         $file = \Illuminate\Support\Facades\File::get($path);
         $type = \Illuminate\Support\Facades\File::mimeType($path);
-
         $response = Response::make($file, 200);
         $response->header("Content-Type", $type);
 

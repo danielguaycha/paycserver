@@ -54,8 +54,10 @@ Route::namespace('Api')->group(function () {
     Route::post('/updater/{id}', 'AppUpdateController@update');
     Route::put('/updater/cancel/{id}', 'AppUpdateController@cancel');
     Route::delete('/updater/{id}', 'AppUpdateController@destroy');
+    Route::get('/updates/last', 'AppUpdateController@last');
     Route::post('/updates', 'AppUpdateController@getUpdate');
-    Route::get('/updates/{build}', 'AppUpdateController@downloadUpdate');
+    Route::get('/updates/{path}/{filename}', 'AppUpdateController@downloadUpdate')->name('updates');
+    Route::get('/updates/temp/{path}/{filename}', 'AppUpdateController@downloadUpdateTemp')->name('updates.temp');
 });
 
 Route::get('image/{path}/{filename}', 'AdminController@viewImg');
